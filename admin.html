@@ -51,12 +51,17 @@
     <nav class="seg tabs" role="tablist">
       <button data-t="duas" aria-pressed="true">دوعاکان</button>
       <button data-t="adhkar" aria-pressed="false">ئەزکار</button>
-      <button data-t="times" aria-pressed="false">کاتەکان</button>
       <button data-t="sugg" aria-pressed="false">پێشنیارەکان <span class="badge" id="sgCount" hidden></span></button>
     </nav>
 
     <div class="tabp" id="t-duas">
       <div class="th"><h2>دوعاکان</h2><button class="btn primary sm" data-new="duas">+ دوعای نوێ</button></div>
+      <p class="fine">پۆلێک هەڵبژێرە بۆ بینینی دوعاکانی ئەو پۆلە. بۆ دروستکردنی پۆلی نوێ، لە کاتی زیادکردنی دوعادا ناوێکی نوێ لە خانەی «پۆل» بنووسە.</p>
+      <div class="chips" id="catChips"></div>
+      <div class="catbar" id="catBar" hidden>
+        <label class="field" for="catName">ناوی پۆل<input id="catName" maxlength="40"></label>
+        <button class="btn sm" id="catSave">گۆڕینی ناوی پۆل</button>
+      </div>
       <div class="rows" id="duaRows"></div>
     </div>
 

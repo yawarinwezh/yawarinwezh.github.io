@@ -61,11 +61,24 @@ $$("[data-t]").forEach(b => b.onclick = () => {
 
 /* ---------- lists ---------- */
 const MODE = {me:"بەیانی و ئێوارە", m:"تەنها بەیانی", e:"تەنها ئێوارە", p:"دوای نوێژ"};
+let dcat = "all";
 function renderDuas(){
-  $("#duaRows").innerHTML = data.duas.map(d => `<div class="row"><span class="ord">${ku(d.order ?? "")}</span><div class="body">
+  const cats = [...new Set(data.duas.map(d => d.cat).filter(Boolean))];
+  if(dcat !== "all" && !cats.includes(dcat)) dcat = "all";
+  $("#catChips").innerHTML = [["all", "هەموو", data.duas.length], ...cats.map(c => [c, c, data.duas.filter(d => d.cat === c).length])]
+    .map(([v, n, k]) => `<button aria-pressed="${v === dcat}" data-cat="${esc(v)}">${esc(n)} (${ku(k)})</button>`).join("");
+  show("#catBar", dcat !== "all"); $("#catName").value = dcat === "all" ? "" : dcat;
+  $("#duaRows").innerHTML = data.duas.filter(d => dcat === "all" || d.cat === dcat).map(d => `<div class="row"><span class="ord">${ku(d.order ?? "")}</span><div class="body">
     <b>${esc(d.title)} <span class="tag">${esc(d.cat || "")}</span></b><div class="ar">${esc(d.ar)}</div><small>${esc(d.src || "")}</small></div>
     <div class="acts"><button class="btn sm" data-edit="duas" data-id="${esc(d.id)}">دەستکاری</button></div></div>`).join("") || '<div class="empty">هیچ دوعایەک نییە.</div>';
 }
+$("#catChips").onclick = e => { const b = e.target.closest("[data-cat]"); if(b){ dcat = b.dataset.cat; renderDuas(); } };
+$("#catSave").onclick = async () => {
+  const name = $("#catName").value.trim(); if(!name || name === dcat) return;
+  const {fs, db} = F, b = fs.writeBatch(db);
+  data.duas.filter(d => d.cat === dcat).forEach(d => b.update(fs.doc(db, "duas", d.id), {cat:name}));
+  try{ await b.commit(); dcat = name; toast("ناوی پۆل گۆڕدرا"); await loadAll(); }catch(err){ toast("نەکرا: " + (err.code || "هەڵە")); }
+};
 let adhF = "all";
 function renderAdhkar(){
   $("#adhRows").innerHTML = data.adhkar.filter(x => adhF === "all" || x.mode === adhF).map(x => `<div class="row"><span class="ord">${ku(x.order ?? "")}</span><div class="body">
@@ -102,7 +115,9 @@ function openEditor(col, id, prefill){
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-edit],[data-new]"); if(!b) return;
-  if(b.dataset.new) openEditor(b.dataset.new); else openEditor(b.dataset.edit, b.dataset.id);
+  if(b.dataset.new === "duas") openEditor("duas", null, dcat !== "all" ? {cat:dcat} : {});
+  else if(b.dataset.new === "adhkar") openEditor("adhkar", null, adhF !== "all" ? {mode:adhF} : {});
+  else openEditor(b.dataset.edit, b.dataset.id);
 });
 $("#edClose").onclick = () => $("#editor").close();
 $("#edForm").onsubmit = async e => {

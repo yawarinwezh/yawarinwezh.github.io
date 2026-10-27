@@ -40,3 +40,6 @@ h3{font-size:15px;margin:18px 0 4px}
 .field textarea.ar{font-family:var(--f-ar);font-size:19px;line-height:1.9}
 .check{display:flex;align-items:center;gap:8px;font-size:14px}
 .check input{width:18px;height:18px}
+.catbar{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin:10px 0}
+.catbar .field{flex:1 1 200px}
+#catChips{margin:6px 0 10px}
