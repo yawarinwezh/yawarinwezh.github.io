@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>بەڕێوەبەری یاوەری نوێژ</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b6b57">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/admin.css">
+<script>try{var t=localStorage.getItem("yn.theme");t=t&&JSON.parse(t);if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="adm">
+  <header class="bar">
+    <div class="brand"><img src="icons/icon-192.png" alt="" width="34" height="34"><div><b>بەڕێوەبەر</b><span class="who" id="who"></span></div></div>
+    <div class="bar-actions"><a class="btn sm" href="index.html">گەڕانەوە بۆ ئەپ</a><button class="btn sm" id="logout" hidden>دەرچوون</button></div>
+  </header>
+
+  <!-- not configured -->
+  <section class="panel" id="noConfig" hidden>
+    <h1>Firebase هێشتا ڕێک نەخراوە</h1>
+    <p>بۆ چالاککردنی بەشی بەڕێوەبەر، زانیارییەکانی Firebase لە فایلی <code>firebase-config.js</code> دابنێ. هەنگاوەکان لە فایلی <code>ڕێنمایی.md</code>دا نووسراون.</p>
+  </section>
+
+  <!-- login -->
+  <section class="panel narrow" id="login" hidden>
+    <h1>چوونەژوورەوە</h1>
+    <form id="loginForm" class="stack">
+      <label class="field" for="lEmail">ئیمەیڵ<input id="lEmail" type="email" autocomplete="username" required dir="ltr"></label>
+      <label class="field" for="lPass">وشەی نهێنی<input id="lPass" type="password" autocomplete="current-password" required dir="ltr"></label>
+      <button class="btn primary wide">چوونەژوورەوە</button>
+      <p class="fine" id="lMsg" role="status"></p>
+    </form>
+  </section>
+
+  <!-- signed in but not an admin -->
+  <section class="panel narrow" id="notAdmin" hidden>
+    <h1>ئەم حسابە بەڕێوەبەر نییە</h1>
+    <p>بۆ ئەوەی ئەم حسابە ببێتە بەڕێوەبەر، لە Firebase ← Firestore کۆڵێکشنێک بە ناوی <code>admins</code> دروست بکە و دۆکیومێنتێک بەم ناسنامەیە (Document ID) زیاد بکە:</p>
+    <div class="uid"><code id="uid" dir="ltr"></code><button class="btn sm" id="copyUid">کۆپی</button></div>
+  </section>
+
+  <!-- dashboard -->
+  <section id="dash" hidden>
+    <div class="seed" id="seed" hidden>
+      <div><b>ناوەڕۆک هێشتا لە سێرڤەر نییە</b><small>دوعا، ئەزکار و ڕێکخستنی کاتە بنەڕەتییەکان بخەرە سێرڤەر بۆ ئەوەی دەستکارییان بکەیت.</small></div>
+      <button class="btn primary" id="seedBtn">بارکردنی ناوەڕۆکی بنەڕەتی</button>
+    </div>
+    <nav class="seg tabs" role="tablist">
+      <button data-t="duas" aria-pressed="true">دوعاکان</button>
+      <button data-t="adhkar" aria-pressed="false">ئەزکار</button>
+      <button data-t="times" aria-pressed="false">کاتەکان</button>
+      <button data-t="sugg" aria-pressed="false">پێشنیارەکان <span class="badge" id="sgCount" hidden></span></button>
+    </nav>
+
+    <div class="tabp" id="t-duas">
+      <div class="th"><h2>دوعاکان</h2><button class="btn primary sm" data-new="duas">+ دوعای نوێ</button></div>
+      <div class="rows" id="duaRows"></div>
+    </div>
+
+    <div class="tabp" id="t-adhkar" hidden>
+      <div class="th"><h2>ئەزکار</h2><button class="btn primary sm" data-new="adhkar">+ زیکری نوێ</button></div>
+      <div class="seg mini-seg" id="adhFilter">
+        <button data-f="all" aria-pressed="true">هەموو</button><button data-f="me" aria-pressed="false">بەیانی و ئێوارە</button><button data-f="m" aria-pressed="false">تەنها بەیانی</button><button data-f="e" aria-pressed="false">تەنها ئێوارە</button><button data-f="p" aria-pressed="false">دوای نوێژ</button>
+      </div>
+      <div class="rows" id="adhRows"></div>
+    </div>
+
+    <div class="tabp" id="t-times" hidden>
+      <div class="th"><h2>ڕێکخستنی کاتەکانی بانگ</h2></div>
+      <div class="grid2">
+        <label class="field" for="tMethod">شێوازی حیساب<select id="tMethod"></select></label>
+        <label class="field" for="tAsr">عەسر<select id="tAsr"><option value="1">شافیعی</option><option value="2">حەنەفی</option></select></label>
+        <label class="field" for="tHijri">ڕاستکردنەوەی ڕێکەوتی کۆچی (ڕۆژ)<input id="tHijri" type="number" min="-2" max="2" step="1"></label>
+        <label class="field" for="tNote">تێبینی (لەژێر کاتەکان دەردەکەوێت)<input id="tNote" maxlength="120" placeholder="بۆ نموونە: بەپێی ڕۆژژمێری وەزارەتی ئەوقاف"></label>
+      </div>
+      <h3>ڕێکخستنی خولەک بۆ هەر شارێک</h3>
+      <p class="fine">ژمارەی موجەب خولەک زیاد دەکات، سالب کەمی دەکاتەوە. بۆ نموونە ٢ واتە دوو خولەک دواتر.</p>
+      <div class="tbl offt"><table><thead><tr><th>شار</th><th>بەیانی</th><th>خۆرهەڵاتن</th><th>نیوەڕۆ</th><th>عەسر</th><th>ئێوارە</th><th>خەوتنان</th></tr></thead><tbody id="offRows"></tbody></table></div>
+      <div class="preview" id="tPreview"></div>
+      <div class="actions"><button class="btn primary" id="saveTimes">پاشەکەوتکردنی کاتەکان</button><span class="fine" id="tMsg" role="status"></span></div>
+    </div>
+
+    <div class="tabp" id="t-sugg" hidden>
+      <div class="th"><h2>پێشنیارەکان</h2>
+        <div class="seg mini-seg" id="sgFilter"><button data-f="new" aria-pressed="true">نوێ</button><button data-f="done" aria-pressed="false">بینراو</button><button data-f="all" aria-pressed="false">هەموو</button></div>
+      </div>
+      <div class="rows" id="sgRows"></div>
+    </div>
+  </section>
+</div>
+
+<!-- editor -->
+<dialog class="sheet wide" id="editor">
+  <form class="sheet-in" id="edForm">
+    <div class="sheet-h"><b id="edTitle">دەستکاری</b><button type="button" class="icon-btn" id="edClose" aria-label="داخستن"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div id="edFields" class="stack"></div>
+    <div class="actions"><button class="btn primary" id="edSave">پاشەکەوتکردن</button><button type="button" class="btn danger" id="edDelete">سڕینەوە</button><span class="fine" id="edMsg" role="status"></span></div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

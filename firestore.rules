@@ -1,0 +1,28 @@
+rules_version = '2';
+// Firestore security rules for Yawari Nwezh.
+// Everyone may read duas, adhkar and the times settings; only admins may change them.
+// Anyone may send a suggestion; only admins may read, mark or delete suggestions.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    match /duas/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /adhkar/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /config/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;   // admins are added by hand in the Firebase console
+    }
+    match /suggestions/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['type', 'text', 'name', 'contact', 'status', 'createdAt'])
+        && request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 2000
+        && request.resource.data.type is string && request.resource.data.type.size() <= 40
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.contact is string && request.resource.data.contact.size() <= 120
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

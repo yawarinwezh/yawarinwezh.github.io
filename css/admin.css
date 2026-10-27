@@ -1,0 +1,42 @@
+/* Admin panel: same tokens as the app, wider single column for editing */
+.adm{max-width:900px;margin:0 auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:40px}
+.adm>section{padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}
+.bar-actions{display:flex;gap:8px}
+.who{display:block;font-size:12px;color:var(--muted)}
+.btn.sm{padding:6px 12px;font-size:13px;border-radius:11px}
+.btn.danger{color:#c0392b;border-color:color-mix(in srgb,#c0392b 40%,var(--line))}
+.panel{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;margin:16px}
+.panel.narrow{max-width:420px;margin-inline:auto}
+.panel h1{font-size:20px;margin-bottom:10px}
+.panel code,.uid code{background:var(--sunk);border-radius:6px;padding:1px 6px;font-size:13px}
+.uid{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.seed{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--gold-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
+.seed b{display:block}.seed small{color:var(--muted)}
+.tabs{margin-bottom:14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:99px;background:#c0392b;color:#fff;font-size:11px;line-height:1.7}
+.th{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.th h2{font-size:18px;margin:0}
+h3{font-size:15px;margin:18px 0 4px}
+.mini-seg{margin-bottom:10px;flex-wrap:wrap}
+.mini-seg button{flex:none;font-size:13px;padding:5px 12px}
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.row .ord{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--sunk);font-size:12px;font-weight:700;color:var(--muted)}
+.row .body{flex:1;min-width:0}
+.row .body b{display:block}
+.row .body .ar{font-family:var(--f-ar);font-size:17px;line-height:1.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .body small{color:var(--muted);font-size:12px}
+.row .body p{margin:4px 0;white-space:pre-wrap;font-size:14px}
+.row .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{display:inline-block;font-size:11px;padding:0 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:700;margin-inline-end:4px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.offt input{width:58px;text-align:center;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:4px}
+.offt td:first-child{font-weight:700}
+.preview{margin-top:12px;background:var(--accent-soft);border-radius:14px;padding:10px 14px;font-size:13.5px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.sheet.wide{max-width:720px}
+.field textarea{resize:vertical;min-height:90px}
+.field textarea.ar{font-family:var(--f-ar);font-size:19px;line-height:1.9}
+.check{display:flex;align-items:center;gap:8px;font-size:14px}
+.check input{width:18px;height:18px}

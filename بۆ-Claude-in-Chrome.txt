@@ -1,0 +1,48 @@
+ئەم دەقە کۆپی بکە و بیدە بە Claude in Chrome (Copy this whole text into Claude in Chrome)
+==========================================================================================
+
+You are helping me publish a small Kurdish prayer app called "Yawari Nwezh" (a PWA).
+The project folder "yawari-nwezh" is on my computer (I unzipped yawari-nwezh.zip).
+I am already signed in to GitHub (github.com) and to Google (console.firebase.google.com) in this browser.
+
+Rules:
+- Never type passwords or verification codes. If a login or code is needed, stop and ask me.
+- Do not change any file except firebase-config.js.
+- Explain each step to me briefly in Kurdish (Sorani) as you go.
+- If you cannot upload files from my computer, stop and tell me; I will drag them in myself.
+
+PART 1 — GitHub Pages
+1. Create a new PUBLIC repository named "yawari-nwezh" (no README).
+2. Open the "uploading an existing file" page of that repository, then STOP and tell me:
+   "Drag everything INSIDE the yawari-nwezh folder here (not the folder itself, and not the .zip)".
+   Wait until I say I'm done, then click "Commit changes".
+3. Check that index.html, sw.js and the folders css, js, data, fonts, icons are in the repository root.
+4. Go to Settings → Pages. Source: "Deploy from a branch", Branch: "main", folder "/ (root)". Save.
+5. Wait until the site is live and give me the URL: https://<my-username>.github.io/yawari-nwezh/
+
+PART 2 — Firebase
+6. In console.firebase.google.com create a project named "yawari-nwezh" (turn Google Analytics off).
+7. Build → Firestore Database → Create database → location "eur3 (europe-west)" → Start in production mode.
+8. Firestore → Rules tab: replace everything with the exact contents of the file
+   "firestore.rules" from my GitHub repository (open it at
+   https://github.com/<my-username>/yawari-nwezh/blob/main/firestore.rules, click "Raw", copy all of it). Publish.
+9. Build → Authentication → Get started → enable "Email/Password" → Save.
+10. Authentication → Users → "Add user": STOP and let me type the admin email and password myself.
+11. After I add the user, copy that user's "User UID".
+12. Firestore → Data → Start collection: Collection ID "admins", Document ID = that UID,
+    field "role" (string) = "admin". Save.
+13. Authentication → Settings → Authorized domains → Add domain: "<my-username>.github.io".
+14. Project settings (gear) → Your apps → Web (</>) → app nickname "yawari-nwezh" → Register app
+    (do NOT enable Firebase Hosting). Copy the values of firebaseConfig.
+15. In GitHub open firebase-config.js → Edit (pencil). Replace only the values, keeping the format:
+      apiKey: "...", authDomain: "...", projectId: "...", storageBucket: "...",
+      messagingSenderId: "...", appId: "..."
+    Commit changes.
+
+PART 3 — Check
+16. Wait 2 minutes, open https://<my-username>.github.io/yawari-nwezh/admin.html
+    and tell me to sign in with the admin email and password.
+17. After I sign in, click "بارکردنی ناوەڕۆکی بنەڕەتی" (Load default content) once.
+18. Open https://<my-username>.github.io/yawari-nwezh/ and confirm the prayer times, the Quran,
+    the duas and the settings → "پێشنیار" (suggestion) form all open without errors.
+19. Give me a short summary in Kurdish: the app link, the admin link, and anything that failed.

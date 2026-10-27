@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>یاوەری نوێژ</title>
+<meta name="description" content="کاتەکانی بانگ، قیبلەنما، قورئانی پیرۆز، ئەزکار و دوعا بە کوردی">
+<meta name="theme-color" content="#0b6b57">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="یاوەری نوێژ">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/vazirmatn-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<script>try{var t=localStorage.getItem("yn.theme");t=t&&JSON.parse(t);if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="" width="34" height="34">
+      <div><b>یاوەری نوێژ</b><button class="place-chip" id="placeChip" aria-label="گۆڕینی شوێن"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span id="placeName">هەولێر</span></button></div>
+    </div>
+    <button class="icon-btn" id="openSettings" aria-label="ڕێکخستنەکان"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>
+  </header>
+
+  <main>
+    <!-- HOME / PRAYER TIMES -->
+    <section class="view" id="v-home" data-view="home">
+      <div class="sky" id="sky">
+        <svg class="arc" viewBox="0 0 320 120" aria-hidden="true">
+          <path d="M16 112 Q160 -26 304 112" class="arc-path"/>
+          <line x1="0" y1="112" x2="320" y2="112" class="arc-horizon"/>
+          <g id="sunDot"><circle r="13" class="sun-glow"/><circle r="7" class="sun-core"/></g>
+        </svg>
+        <div class="sky-top">
+          <span id="hijri"></span>
+          <span id="greg"></span>
+        </div>
+        <div class="sky-main">
+          <div>
+            <div class="sky-lab">بانگی داهاتوو</div>
+            <div class="sky-name" id="nextName">—</div>
+            <div class="sky-at" id="nextAt"></div>
+          </div>
+          <div class="sky-cd">
+            <div class="sky-lab">ماوە</div>
+            <div class="cd num" id="countdown">--:--:--</div>
+          </div>
+        </div>
+      </div>
+
+      <ol class="plist" id="plist"></ol>
+
+      <div class="quick">
+        <a class="qcard" href="#quran" id="qkQuran"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg></span><span><b>قورئانی پیرۆز</b><small id="qkQuranSub">دەست بە خوێندنەوە بکە</small></span></a>
+        <a class="qcard" href="#adhkar" id="qkAdhkar"><span class="qk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"/><circle cx="17.3" cy="6.7" r="1.6"/><circle cx="19.5" cy="12" r="1.6"/><circle cx="17.3" cy="17.3" r="1.6"/><circle cx="6.7" cy="6.7" r="1.6"/><circle cx="4.5" cy="12" r="1.6"/><circle cx="6.7" cy="17.3" r="1.6"/><path d="M12 19.5v3"/></svg></span><span><b id="qkAdhkarT">ئەزکاری بەیانیان</b><small id="qkAdhkarSub"></small></span></a>
+      </div>
+
+      <details class="month" id="monthBox">
+        <summary>خشتەی کاتەکانی ٣٠ ڕۆژی داهاتوو</summary>
+        <div class="tbl"><table><thead><tr><th>ڕۆژ</th><th>بەیانی</th><th>خۆرهەڵاتن</th><th>نیوەڕۆ</th><th>عەسر</th><th>ئێوارە</th><th>خەوتنان</th></tr></thead><tbody id="monthBody"></tbody></table></div>
+      </details>
+      <p class="fine" id="methodNote"></p>
+    </section>
+
+    <!-- QURAN -->
+    <section class="view" id="v-quran" data-view="quran" hidden>
+      <div class="vh"><h1>قورئانی پیرۆز</h1><span class="sub">موسحەفی مەدینە · ڕیوایەتی حەفس</span></div>
+      <button class="continue" id="qContinue" hidden></button>
+      <div class="seg" role="group" aria-label="پێڕست">
+        <button data-qtab="surah" aria-pressed="true">سورەتەکان</button>
+        <button data-qtab="juz" aria-pressed="false">جوزئەکان</button>
+      </div>
+      <div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="qSearch" type="search" placeholder="ناوی سورەت، ژمارە، یان لاپەڕە…" aria-label="گەڕان لە قورئان"></div>
+      <div class="slist" id="slist"><div class="empty">قورئان ئامادە دەکرێت…</div></div>
+    </section>
+
+    <!-- QIBLA -->
+    <section class="view" id="v-qibla" data-view="qibla" hidden>
+      <div class="vh"><h1>قیبلەنما</h1><span class="sub" id="qibPlace"></span></div>
+      <div class="compass-wrap">
+        <div class="compass" id="compass">
+          <svg viewBox="-160 -160 320 320" aria-hidden="true"><g id="rose"></g><g id="qNeedle"></g>
+            <path d="M0 -158 L-9 -140 L9 -140 Z" class="lubber"/></svg>
+        </div>
+        <div class="qstatus" id="qStatus">بۆ دەستپێکردن، دوگمەکەی خوارەوە دابگرە</div>
+      </div>
+      <button class="btn primary wide" id="qStart">دەستپێکردنی قیبلەنما</button>
+      <div class="facts">
+        <div class="fact"><b class="num" id="qDeg" dir="ltr">—</b><span>پلە لە باکوورەوە</span></div>
+        <div class="fact"><b class="num" id="qDist">—</b><span>دووری تا کەعبە</span></div>
+        <div class="fact"><b class="num" id="qSun">—</b><span>کاتی خۆری قیبلە</span></div>
+      </div>
+      <div class="tip">
+        <b>ڕێنمایی</b>
+        <ul>
+          <li>مۆبایلەکە بە تەختی ڕابگرە و لە ئاسن، ئۆتۆمبێل و موگناتیس دووری بخەرەوە.</li>
+          <li>ئەگەر ئاراستەکە جێگیر نەبوو، مۆبایلەکە چەند جارێک بە شێوەی ژمارە ٨ بجووڵێنە بۆ ڕێکخستنەوەی هەستەوەرەکە.</li>
+          <li>بێ ئینتەرنێت کار دەکات. بۆ وردیی زیاتر لە ڕێکخستنەکان «شوێنی ئێستام (GPS)» هەڵبژێرە.</li>
+          <li>لە «کاتی خۆری قیبلە»دا خۆر ڕێک لە ئاراستەی قیبلەیە: ڕووت بکە خۆر و قیبلەکەت دۆزیوەتەوە.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ADHKAR -->
+    <section class="view" id="v-adhkar" data-view="adhkar" hidden>
+      <div class="vh"><h1 id="adhTitle">ئەزکار</h1><span class="sub" id="adhProg"></span></div>
+      <div class="seg" role="group" aria-label="جۆری ئەزکار">
+        <button data-mode="m">بەیانیان</button>
+        <button data-mode="e">ئێواران</button>
+        <button data-mode="p">دوای نوێژ</button>
+      </div>
+      <div class="pbar"><i id="adhBar"></i></div>
+      <div class="cards" id="adhList"></div>
+      <button class="btn ghost" id="adhReset">سفرکردنەوەی ژمێرەرەکان</button>
+    </section>
+
+    <!-- DUAS -->
+    <section class="view" id="v-duas" data-view="duas" hidden>
+      <div class="vh"><h1>دوعاکان</h1><span class="sub">عەرەبی لەگەڵ واتای کوردی</span></div>
+      <div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="dSearch" type="search" placeholder="گەڕان لە دوعاکان…" aria-label="گەڕان لە دوعاکان"></div>
+      <div class="chips" id="dCats"></div>
+      <div class="cards" id="dList"></div>
+      <button class="suggest-cta" id="openSuggest"><span><b>بیرۆکە یان دوعایەکت هەیە؟</b><small>پێشنیارەکەت بۆ بەڕێوەبەر بنێرە</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="بەشەکان">
+    <a href="#home" data-nav="home"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg><span>بانگ</span></a>
+    <a href="#quran" data-nav="quran"><svg viewBox="0 0 24 24"><path d="M12 6.5C10 4.8 7 4 3 4v14c4 0 7 .8 9 2.5 2-1.7 5-2.5 9-2.5V4c-4 0-7 .8-9 2.5Z"/><path d="M12 6.5v14"/></svg><span>قورئان</span></a>
+    <a href="#qibla" data-nav="qibla"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/></svg><span>قیبلە</span></a>
+    <a href="#adhkar" data-nav="adhkar"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"/><circle cx="17.3" cy="6.7" r="1.6"/><circle cx="19.5" cy="12" r="1.6"/><circle cx="17.3" cy="17.3" r="1.6"/><circle cx="6.7" cy="6.7" r="1.6"/><circle cx="4.5" cy="12" r="1.6"/><circle cx="6.7" cy="17.3" r="1.6"/><path d="M12 19.5v3"/></svg><span>ئەزکار</span></a>
+    <a href="#duas" data-nav="duas"><svg viewBox="0 0 24 24"><path d="M7 21v-5.5L4.3 10a1.8 1.8 0 0 1 3.1-1.8L10 12V5.5a1.5 1.5 0 0 1 3 0V12M17 21v-5.5l2.7-5.5a1.8 1.8 0 0 0-3.1-1.8L14 12"/></svg><span>دوعا</span></a>
+  </nav>
+</div>
+
+<!-- Quran reader (full screen) -->
+<div class="reader" id="reader" hidden>
+  <div class="r-top">
+    <button class="icon-btn" id="rClose" aria-label="داخستن"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <div class="r-title"><b id="rSurah"></b><small id="rJuz"></small></div>
+    <button class="icon-btn" id="rFont" aria-label="قەبارەی نووسین"><svg viewBox="0 0 24 24"><path d="M4 19 9 5l5 14M5.8 14h6.4M15 19l3-8 3 8M15.9 17h4.2"/></svg></button>
+  </div>
+  <div class="r-font" id="rFontBar" hidden>
+    <span>ئ</span><input type="range" id="rSize" min="18" max="40" step="1" aria-label="قەبارەی نووسینی قورئان"><span class="big">ئ</span>
+  </div>
+  <div class="r-stage" id="rStage">
+    <article class="page" id="rPage"></article>
+  </div>
+  <div class="r-bot">
+    <button class="icon-btn" id="rPrev" aria-label="لاپەڕەی پێشوو"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <label class="r-pg">لاپەڕە <input id="rPg" type="text" inputmode="numeric" aria-label="ژمارەی لاپەڕە"> لە ٦٠٤</label>
+    <button class="icon-btn" id="rNext" aria-label="لاپەڕەی دواتر"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+  </div>
+</div>
+
+<!-- Settings sheet -->
+<dialog class="sheet" id="settings">
+  <form method="dialog" class="sheet-in">
+    <div class="sheet-h"><b>ڕێکخستنەکان</b><button class="icon-btn" value="close" aria-label="داخستن"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <label class="field" for="sPlace">شار
+      <select id="sPlace"></select>
+    </label>
+    <button type="button" class="btn wide" id="sGps"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg> شوێنی ئێستام (GPS)</button>
+    <p class="fine" id="sGpsNote"></p>
+    <div class="field">ڕووکار
+      <div class="seg" role="group" aria-label="ڕووکار" id="sTheme">
+        <button type="button" data-theme-set="auto">خۆکار</button>
+        <button type="button" data-theme-set="light">ڕووناک</button>
+        <button type="button" data-theme-set="dark">تاریک</button>
+      </div>
+    </div>
+    <button type="button" class="btn wide" id="sSuggest">پێشنیار یان ڕاستکردنەوە بنێرە</button>
+    <div class="about">
+      <p id="sSync"></p>
+      <p>کاتەکان لەسەر مۆبایلەکەت حیساب دەکرێن و بێ ئینتەرنێت کار دەکەن. شێوازی حیساب و ڕێکخستنی خولەکەکان لەلایەن بەڕێوەبەرەوە دیاری دەکرێن.</p>
+      <p>دەقی قورئان: ڕێنووسی عوسمانی، ڕیوایەتی حەفس لە عاسم، بە فۆنتی کۆمەڵگەی پاشا فەهد بۆ چاپکردنی قورئانی پیرۆز.</p>
+      <a href="admin.html" class="admin-link">چوونەژوورەوەی بەڕێوەبەر</a>
+    </div>
+  </form>
+</dialog>
+
+<!-- Suggestion sheet -->
+<dialog class="sheet" id="suggest">
+  <form class="sheet-in" id="sgForm">
+    <div class="sheet-h"><b>ناردنی پێشنیار</b><button type="button" class="icon-btn" id="sgClose" aria-label="داخستن"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <p class="fine">پێشنیارەکەت ڕاستەوخۆ بڵاو نابێتەوە. بەڕێوەبەر دەیخوێنێتەوە و دوای پشکنین زیادی دەکات.</p>
+    <label class="field" for="sgType">جۆر
+      <select id="sgType">
+        <option>دوعا یان زیکری نوێ</option>
+        <option>ڕاستکردنەوەی کاتی بانگ</option>
+        <option>هەڵەیەک لە دەق یان وەرگێڕان</option>
+        <option>بیرۆکە بۆ ئەپەکە</option>
+      </select>
+    </label>
+    <label class="field" for="sgText">پێشنیارەکەت
+      <textarea id="sgText" rows="5" required maxlength="2000" placeholder="بۆ دوعا: دەقی عەرەبی، واتای کوردی و سەرچاوەکەی بنووسە. بۆ کاتی بانگ: شار، بانگ و چەند خولەک جیاوازی هەیە."></textarea>
+    </label>
+    <div class="row2">
+      <label class="field" for="sgName">ناوت (ئارەزوومەندانە)<input id="sgName" maxlength="80"></label>
+      <label class="field" for="sgContact">ژمارە یان ئیمەیڵ (ئارەزوومەندانە)<input id="sgContact" maxlength="120"></label>
+    </div>
+    <button class="btn primary wide" id="sgSend">ناردن</button>
+    <p class="fine" id="sgMsg" role="status"></p>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
