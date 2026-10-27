@@ -1,6 +1,6 @@
 // Offline support: the whole app, fonts and the Quran are stored on the phone after the first visit.
 // Raise VERSION whenever any file changes, so phones fetch the new files.
-const VERSION = "yn-v2";
+const VERSION = "yn-v3";
 const SHELL = [
   "./", "index.html", "admin.html", "manifest.webmanifest", "firebase-config.js",
   "css/app.css", "css/admin.css", "js/app.js", "js/core.js", "js/defaults.js", "js/admin.js",
@@ -28,6 +28,12 @@ self.addEventListener("fetch", e => {
     return;
   }
   if(url.origin !== location.origin) return;
+  // Settings that may be edited on GitHub: try the network first, fall back to the stored copy offline.
+  if(url.pathname.endsWith("/firebase-config.js")){
+    e.respondWith(fetch(req).then(r => { if(r.ok){ const copy = r.clone(); caches.open(VERSION).then(c => c.put(req, copy)); } return r; })
+      .catch(() => caches.match(req, {ignoreSearch:true})));
+    return;
+  }
   e.respondWith(caches.match(req, {ignoreSearch:true}).then(hit => hit || fetch(req).then(r => {
     if(r.ok){ const copy = r.clone(); caches.open(VERSION).then(c => c.put(req, copy)); }
     return r;
