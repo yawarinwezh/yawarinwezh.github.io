@@ -1,9 +1,9 @@
 // Offline support: the whole app, fonts and the Quran are stored on the phone after the first visit.
 // Raise VERSION whenever any file changes, so phones fetch the new files.
-const VERSION = "yn-v3";
+const VERSION = "yn-v4";
 const SHELL = [
   "./", "index.html", "admin.html", "manifest.webmanifest", "firebase-config.js",
-  "css/app.css", "css/admin.css", "js/app.js", "js/core.js", "js/defaults.js", "js/admin.js",
+  "css/app.css", "css/admin.css", "js/app.js", "js/core.js", "js/defaults.js", "js/official-data.js", "js/admin.js",
   "data/quran.json", "data/meta.json",
   "fonts/kfgqpc-hafs.woff2", "fonts/amiri-arabic-400-normal.woff2", "fonts/amiri-arabic-700-normal.woff2",
   "fonts/vazirmatn-arabic-400-normal.woff2", "fonts/vazirmatn-arabic-500-normal.woff2", "fonts/vazirmatn-arabic-700-normal.woff2",

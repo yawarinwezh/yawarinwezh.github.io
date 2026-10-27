@@ -1,6 +1,6 @@
 import {
   store, ku, fromKu, pad, esc, t12, gdate, hijri, CITIES, PRAYERS, METHODS, place, iraqNow, prayerTimes, nextPrayer,
-  qiblaBearing, distKm, sunQiblaTime, cachedContent, refreshContent, firebaseReady, sendSuggestion, WD
+  qiblaBearing, distKm, sunQiblaTime, cachedContent, refreshContent, firebaseReady, sendSuggestion, WD, tableId
 } from "./core.js";
 
 const $ = s => document.querySelector(s);
@@ -54,7 +54,9 @@ function renderHome(force){
     $("#nextName").textContent = n.n;
     $("#nextAt").innerHTML = `${n.day ? "سبەینێ، " : ""}کاتژمێر ${t12(n.at)}`;
     const m = METHODS[cfg().method] || METHODS.MWL;
-    $("#methodNote").textContent = `شێوازی حیساب: ${m.n} · عەسر: ${+cfg().asr === 2 ? "حەنەفی" : "شافیعی"} · کاتی عێراق (UTC+3)${cfg().note ? " · " + cfg().note : ""}`;
+    $("#methodNote").textContent = (tableId(c)
+      ? `سەرچاوە: خشتەی کاتەکانی بانگی ${c.id === "gps" ? c.near : c.n} (کەناڵی ئامۆژگاری)`
+      : `حیسابی ئەستێرەناسی: ${m.n} · عەسر: ${+cfg().asr === 2 ? "حەنەفی" : "شافیعی"}`) + ` · کاتی عێراق (UTC+3)${cfg().note ? " · " + cfg().note : ""}`;
     renderMonth();
   }
   // countdown

@@ -1,6 +1,7 @@
 // Shared logic: prayer-time astronomy, Kurdish formatting, local storage, and the Firebase data layer.
 import { FIREBASE_CONFIG } from "../firebase-config.js";
 import { DEFAULT_ADHKAR, DEFAULT_DUAS, DEFAULT_TIMES } from "./defaults.js";
+import { OFFICIAL } from "./official-data.js";
 
 /* ---------- storage ---------- */
 export const store = {
@@ -56,7 +57,8 @@ export function place(){
   const sel = store.get("place", {id:"erbil"});
   if(sel.id === "gps" && sel.lat != null){
     const near = nearestCity(sel.lat, sel.lng);
-    return {id:"gps", n:"شوێنی ئێستام", lat:sel.lat, lng:sel.lng, el:sel.el || near.el, offId:near.id, near:near.n};
+    const km = Math.hypot(near.lat - sel.lat, (near.lng - sel.lng) * Math.cos(sel.lat * Math.PI / 180)) * 111.2;
+    return {id:"gps", n:"شوێنی ئێستام", lat:sel.lat, lng:sel.lng, el:sel.el || near.el, offId:near.id, near:near.n, nearKm:km};
   }
   const c = CITIES.find(c => c.id === sel.id) || CITIES[0];
   return Object.assign({offId:c.id}, c);
@@ -95,7 +97,27 @@ export const PRAYERS = [
   {k:"maghrib", n:"ئێوارە", ar:"المغرب"},
   {k:"isha", n:"خەوتنان", ar:"العشاء"}
 ];
+// Published city timetables (js/official-data.js). A GPS position uses its nearest city's table within 15 km.
+const tables = {};
+export function tableId(c){
+  const id = c.id === "gps" ? (c.nearKm <= 15 ? c.offId : null) : c.id;
+  return id && OFFICIAL[id] ? id : null;
+}
+function fromTable(id, date){
+  const t = tables[id] || (tables[id] = OFFICIAL[id].split(",").map(Number));
+  const m = date.getMonth(), d = (m === 1 && date.getDate() === 29) ? 28 : date.getDate();
+  const doy = Math.round((Date.UTC(2026, m, d) - Date.UTC(2026, 0, 1)) / 864e5);
+  return t.slice(doy * 6, doy * 6 + 6);
+}
 export function prayerTimes(date, c, cfg){
+  const tid = tableId(c);
+  if(tid){
+    const v = fromTable(tid, date), off = (cfg.offsets && cfg.offsets[c.offId || c.id]) || {}, out = {};
+    ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"].forEach((k, i) => {
+      out[k] = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, v[i] + (+(off[k] || 0)), 0);
+    });
+    return out;
+  }
   const jd = julian(date.getFullYear(), date.getMonth() + 1, date.getDate()) - c.lng / (15 * 24);
   const lat = c.lat, m = METHODS[cfg.method] || METHODS.MWL;
   const mid = t => fix(12 - sunPos(jd + t).eqt, 24);
