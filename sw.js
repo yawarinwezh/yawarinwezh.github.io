@@ -1,13 +1,13 @@
 // Offline support: the whole app, fonts and the Quran are stored on the phone after the first visit.
 // Raise VERSION whenever any file changes, so phones fetch the new files.
-const VERSION = "yn-v4";
+const VERSION = "yn-v5";
 const SHELL = [
   "./", "index.html", "admin.html", "manifest.webmanifest", "firebase-config.js",
   "css/app.css", "css/admin.css", "js/app.js", "js/core.js", "js/defaults.js", "js/official-data.js", "js/admin.js",
   "data/quran.json", "data/meta.json",
   "fonts/kfgqpc-hafs.woff2", "fonts/amiri-arabic-400-normal.woff2", "fonts/amiri-arabic-700-normal.woff2",
-  "fonts/vazirmatn-arabic-400-normal.woff2", "fonts/vazirmatn-arabic-500-normal.woff2", "fonts/vazirmatn-arabic-700-normal.woff2",
-  "fonts/vazirmatn-arabic-800-normal.woff2", "fonts/vazirmatn-latin-400-normal.woff2", "fonts/vazirmatn-latin-700-normal.woff2",
+  "fonts/plex-arabic-400.woff2", "fonts/plex-arabic-500.woff2", "fonts/plex-arabic-600.woff2", "fonts/plex-arabic-700.woff2",
+  "fonts/plex-latin-400.woff2", "fonts/plex-latin-700.woff2",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png"
 ];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL))); });

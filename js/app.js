@@ -33,10 +33,6 @@ const PICON = {
   maghrib:'<svg viewBox="0 0 24 24"><path d="M3 18h18M7 18a5 5 0 0 1 10 0"/><path d="M12 4v6m-3-3 3 3 3-3"/></svg>',
   isha:'<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z"/></svg>'
 };
-const SKY = {
-  night:["#0a1630","#1d2d5a"], dawn:["#22325f","#c7836f"], morning:["#1f6f9f","#7cc0de"],
-  noon:["#13739d","#4fb3cf"], golden:["#a35f22","#e2ab55"], dusk:["#2c2350","#b3573b"]
-};
 let lastSig = "";
 function renderHome(force){
   const now = iraqNow(), c = place(), n = nextPrayer(now, c, cfg()), t = n.today;
@@ -63,15 +59,8 @@ function renderHome(force){
   let s = Math.max(0, Math.floor((n.at - now) / 1000));
   const h = Math.floor(s / 3600); s -= h * 3600; const mi = Math.floor(s / 60); s -= mi * 60;
   $("#countdown").textContent = ku(`${pad(h)}:${pad(mi)}:${pad(s)}`);
-  // sky colour and sun/moon position
-  let period = "night";
-  if(now >= t.fajr && now < t.sunrise) period = "dawn";
-  else if(now >= t.sunrise && now < t.dhuhr) period = "morning";
-  else if(now >= t.dhuhr && now < t.asr) period = "noon";
-  else if(now >= t.asr && now < t.maghrib) period = "golden";
-  else if(now >= t.maghrib && now < t.isha) period = "dusk";
+  // sun/moon position on the arc
   const sky = $("#sky");
-  sky.style.setProperty("--sky1", SKY[period][0]); sky.style.setProperty("--sky2", SKY[period][1]);
   const day = now >= t.sunrise && now < t.maghrib;
   sky.classList.toggle("night", !day);
   let f;
@@ -204,7 +193,7 @@ function buildRose(){
     s += `<line y1="-${r1}" y2="-141" stroke="${big ? "var(--ink)" : "var(--muted)"}" stroke-width="${big ? 2 : 1}" transform="rotate(${a})"/>`;
   }
   [["باکوور", 0], ["ڕۆژهەڵات", 90], ["باشوور", 180], ["ڕۆژئاوا", 270]].forEach(([t, a]) => {
-    s += `<text transform="rotate(${a}) translate(0,-109) rotate(${-a})" text-anchor="middle" dominant-baseline="middle" font-size="${a ? 12 : 14}" font-weight="700" fill="${a ? "var(--muted)" : "#d0473a"}" stroke="none" font-family="Vazirmatn,sans-serif">${t}</text>`;
+    s += `<text transform="rotate(${a}) translate(0,-109) rotate(${-a})" text-anchor="middle" dominant-baseline="middle" font-size="${a ? 12 : 14}" font-weight="700" fill="${a ? "var(--muted)" : "#d0473a"}" stroke="none" font-family="IBM Plex Sans Arabic,sans-serif">${t}</text>`;
   });
   s += `<g id="kaaba"><line y1="0" y2="-74" stroke="var(--gold)" stroke-width="4" stroke-linecap="round"/>
         <g transform="translate(0,-90)"><rect x="-13" y="-13" width="26" height="26" rx="2.5" fill="#111" stroke="none"/><rect x="-13" y="-6.5" width="26" height="4" fill="var(--gold)" stroke="none"/></g></g>

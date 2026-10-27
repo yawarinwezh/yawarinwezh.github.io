@@ -1,34 +1,37 @@
-/* Layout: phone-first app shell — sky band with the next prayer on top, content views, fixed bottom tab bar; Quran opens as a full-screen mushaf page */
-@font-face{font-family:"Vazirmatn";font-weight:400;font-display:swap;src:url(../fonts/vazirmatn-arabic-400-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
-@font-face{font-family:"Vazirmatn";font-weight:500;font-display:swap;src:url(../fonts/vazirmatn-arabic-500-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+200C-200E,U+FB50-FDFF,U+FE70-FEFC}
-@font-face{font-family:"Vazirmatn";font-weight:700;font-display:swap;src:url(../fonts/vazirmatn-arabic-700-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+200C-200E,U+FB50-FDFF,U+FE70-FEFC}
-@font-face{font-family:"Vazirmatn";font-weight:800;font-display:swap;src:url(../fonts/vazirmatn-arabic-800-normal.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+200C-200E,U+FB50-FDFF,U+FE70-FEFC}
-@font-face{font-family:"Vazirmatn";font-weight:400;font-display:swap;src:url(../fonts/vazirmatn-latin-400-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
-@font-face{font-family:"Vazirmatn";font-weight:700;font-display:swap;src:url(../fonts/vazirmatn-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
+/* Layout (Yaqut): phone-first app shell — emerald band with the next prayer on top, content views, fixed bottom tab bar; Quran opens as a full-screen mushaf page */
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:400;font-display:swap;src:url(../fonts/plex-arabic-400.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:500;font-display:swap;src:url(../fonts/plex-arabic-500.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:600;font-display:swap;src:url(../fonts/plex-arabic-600.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:700 800;font-display:swap;src:url(../fonts/plex-arabic-700.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:400 500;font-display:swap;src:url(../fonts/plex-latin-400.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:"IBM Plex Sans Arabic";font-weight:600 800;font-display:swap;src:url(../fonts/plex-latin-700.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
 @font-face{font-family:"Amiri";font-weight:400;font-display:swap;src:url(../fonts/amiri-arabic-400-normal.woff2) format("woff2")}
 @font-face{font-family:"Amiri";font-weight:700;font-display:swap;src:url(../fonts/amiri-arabic-700-normal.woff2) format("woff2")}
 @font-face{font-family:"KFGQPC Hafs";font-display:block;src:url(../fonts/kfgqpc-hafs.woff2) format("woff2")}
 
 :root{
-  --bg:#f3f6f5; --surface:#ffffff; --sunk:#e9eeec; --ink:#0f1f1a; --muted:#5a6a64; --line:#dce4e0;
-  --accent:#0b6b57; --accent-ink:#ffffff; --accent-soft:#e1f0ea; --gold:#a27b2a; --gold-soft:#f5ecd4;
-  --paper:#fffcf3; --paper-ink:#1d1a14; --frame:#c4a24f; --frame-soft:#efe3c0; --ok:#1f8a55;
-  --shadow:0 1px 2px rgb(15 31 26/.06),0 6px 20px rgb(15 31 26/.06);
-  --f-ui:"Vazirmatn","Noto Sans Arabic",Tahoma,sans-serif;
+  --bg:#f5f3ec; --surface:#ffffff; --sunk:#eef0ea; --ink:#13241e; --muted:#66726c; --line:#e4e2da;
+  --accent:#0f5c4d; --accent-ink:#ffffff; --accent-soft:#e4efe9; --gold:#a3812f; --gold-soft:#f4ecd6;
+  --paper:#fffcf3; --paper-ink:#1d1a14; --frame:#c9a24a; --frame-soft:#efe3c0; --ok:#1f8a55;
+  --hero1:#0f5c4d; --hero2:#0a3f35; --hero-ink:#fdf8ea; --star:#c9a24a;
+  --shadow:0 1px 2px rgb(19 36 30/.05),0 6px 16px rgb(19 36 30/.06);
+  --f-ui:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;
   --f-ar:"Amiri","Noto Naskh Arabic","Traditional Arabic",serif;
   --f-q:"KFGQPC Hafs","Amiri Quran","Amiri",serif;
   --r:18px; --tab-h:64px;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0a100f; --surface:#121a18; --sunk:#18221f; --ink:#e6eeea; --muted:#94a49e; --line:#232f2b;
-  --accent:#4cc3a3; --accent-ink:#04211a; --accent-soft:#132d27; --gold:#d9b465; --gold-soft:#2c2618;
+  --bg:#0c1311; --surface:#131c19; --sunk:#1a2622; --ink:#e8ede9; --muted:#94a39c; --line:#24312c;
+  --accent:#3fb894; --accent-ink:#04201a; --accent-soft:#143128; --gold:#d8b45e; --gold-soft:#2c2617;
   --paper:#15130e; --paper-ink:#ece3cc; --frame:#8d7440; --frame-soft:#2a2316; --ok:#5fd394;
+  --hero1:#0e4a3e; --hero2:#082c25; --hero-ink:#f6f1e3; --star:#d8b45e;
   --shadow:0 1px 2px rgb(0 0 0/.3); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0a100f; --surface:#121a18; --sunk:#18221f; --ink:#e6eeea; --muted:#94a49e; --line:#232f2b;
-  --accent:#4cc3a3; --accent-ink:#04211a; --accent-soft:#132d27; --gold:#d9b465; --gold-soft:#2c2618;
+  --bg:#0c1311; --surface:#131c19; --sunk:#1a2622; --ink:#e8ede9; --muted:#94a39c; --line:#24312c;
+  --accent:#3fb894; --accent-ink:#04201a; --accent-soft:#143128; --gold:#d8b45e; --gold-soft:#2c2617;
   --paper:#15130e; --paper-ink:#ece3cc; --frame:#8d7440; --frame-soft:#2a2316; --ok:#5fd394;
+  --hero1:#0e4a3e; --hero2:#082c25; --hero-ink:#f6f1e3; --star:#d8b45e;
   --shadow:0 1px 2px rgb(0 0 0/.3); color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -59,17 +62,17 @@ main{padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-ar
 
 /* sky hero */
 .sky{position:relative;overflow:hidden;border-radius:24px;padding:16px 18px 18px;color:#fff;min-height:208px;display:flex;flex-direction:column;justify-content:space-between;
-  background:linear-gradient(170deg,var(--sky1,#0d2a48),var(--sky2,#1b5a77));box-shadow:0 10px 30px -12px var(--sky1,#0d2a48);transition:background .6s}
-.sky::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 120%,rgb(255 255 255/.18),transparent 60%);pointer-events:none}
-.sky.night::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;
-  background-image:radial-gradient(1px 1px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 28% 12%,#fff,transparent),radial-gradient(1.2px 1.2px at 46% 30%,#fff,transparent),radial-gradient(1px 1px at 63% 16%,#fff,transparent),radial-gradient(1px 1px at 82% 26%,#fff,transparent),radial-gradient(1px 1px at 90% 8%,#fff,transparent),radial-gradient(1px 1px at 7% 6%,#fff,transparent)}
-.arc{position:absolute;inset:auto 0 0 0;width:100%;height:auto;opacity:.95}
-.arc-path{stroke:rgb(255 255 255/.35);stroke-width:1.4;stroke-dasharray:3 5}
+  background:linear-gradient(160deg,var(--hero1),var(--hero2));color:var(--hero-ink);box-shadow:0 14px 30px -16px var(--hero1)}
+.sky::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.14;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 14 14'%3E%3Cpath d='M7 1.5 8.6 5.4 12.5 7 8.6 8.6 7 12.5 5.4 8.6 1.5 7 5.4 5.4Z' fill='none' stroke='%23e9d6a0' stroke-width='.45'/%3E%3C/svg%3E") 0 0/28px 28px}
+.sky::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 85% 0%,rgb(255 255 255/.10),transparent 60%)}
+.arc{display:none}
+.arc-path{stroke:rgb(233 214 160/.35);stroke-width:1.2;stroke-dasharray:3 5}
 .arc-horizon{stroke:rgb(255 255 255/.22);stroke-width:1}
-.sun-glow{fill:rgb(255 236 170/.28);stroke:none}
-.sun-core{fill:#ffe9a8;stroke:none}
-.sky.night .sun-glow{fill:rgb(220 230 255/.2)}
-.sky.night .sun-core{fill:#e9eefc}
+.sun-glow{fill:rgb(233 200 120/.25);stroke:none}
+.sun-core{fill:var(--star);stroke:none}
+.sky.night .sun-glow{fill:rgb(240 235 220/.18)}
+.sky.night .sun-core{fill:#f3ead2}
 .sky-top{position:relative;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12.5px;opacity:.9}
 .sky-main{position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:22px}
 .sky-lab{font-size:12.5px;opacity:.8}
@@ -138,7 +141,7 @@ main{padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-ar
 .empty{padding:28px;text-align:center;color:var(--muted)}
 
 /* quran index */
-.continue{display:flex;align-items:center;gap:12px;width:100%;text-align:right;border:0;border-radius:var(--r);padding:14px 16px;margin-bottom:12px;color:#fff;background:linear-gradient(135deg,#0b6b57,#13453b)}
+.continue{display:flex;align-items:center;gap:12px;width:100%;text-align:right;border:0;border-radius:var(--r);padding:14px 16px;margin-bottom:12px;color:var(--hero-ink);background:linear-gradient(135deg,var(--hero1),var(--hero2))}
 .continue b{display:block;font-size:15px}
 .continue small{opacity:.85;font-size:12.5px}
 .continue .cn{margin-inline-start:auto;font-family:var(--f-q);font-size:24px}
