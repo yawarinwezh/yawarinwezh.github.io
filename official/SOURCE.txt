@@ -1,0 +1,14 @@
+Source site: https://amozhgary.tv/bang/<City>?month=1 .. 12 (Amozhgari channel / کەناڵی ئامۆژگاری)
+Source named by the site: none. The site names no official body (for example no Ministry of Endowments); its footer only says "© 2026 کەناڵی ئامۆژگاری". The "About" page does not mention one either.
+Year shown: 2026
+Date collected: 2026-10-27
+
+Format: month,day,fajr,sunrise,dhuhr,asr,maghrib,isha  (24-hour HH:MM)
+Times are copied as the site shows them (12-hour, no AM/PM). Conversion to 24-hour only: asr, maghrib, isha +12h; dhuhr +12h when the shown hour is below 07. Nothing was calculated or corrected.
+
+Cities on this folder: erbil, sulaymaniyah, duhok, halabja, kirkuk, zakho, ranya, koya (site slug: Koysinjaq), akre, chamchamal, kalar, penjwen
+Skipped (the site has a page but no prayer times): soran, shaqlawa
+
+Notes:
+- The site lists a bogus row "29 - ئازار" at the end of every February table (2026 has no Feb 29). It was not copied; each file has 365 days.
+- halabja.csv, 9/3 maghrib is shown by the site as 02:27 (converted to 14:27). This looks like a typo on the site (neighbouring days are about 18:2x); it was copied as shown and should be checked.
