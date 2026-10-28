@@ -120,7 +120,8 @@ function renderIndex(){
     cont.hidden = false; cont.dataset.page = last;
     cont.innerHTML = `<span><b>بەردەوامبوون لە خوێندنەوە</b><small>${esc(Q[s][0])} · لاپەڕە ${ku(last)} · جوزئی ${ku(juzOf(META.pages[last - 1]))}</small></span><span class="cn">${esc(Q[s][0])}</span>`;
   } else cont.hidden = true;
-  $("#qkQuranSub").textContent = last ? `لاپەڕە ${ku(last)} · ${Q[surahOf(META.pages[last - 1])][0]}` : "دەست بە خوێندنەوە بکە";
+  quranSub();
+  renderKhatm();
 }
 $$("[data-qtab]").forEach(b => b.onclick = () => { qtab = b.dataset.qtab; $$("[data-qtab]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderIndex(); });
 $("#qSearch").oninput = () => Q && renderIndex();
@@ -149,8 +150,17 @@ function renderPage(hl){
   $("#rPg").value = ku(page);
   $("#rPrev").disabled = page <= 1; $("#rNext").disabled = page >= 604;
   store.set("q.page", page);
+  trackPage(page);
   if(hl){ const el = $("#rPage .v.hl"); if(el){ setTimeout(() => el.scrollIntoView({block:"center"}), 30); setTimeout(() => el.classList.remove("hl"), 1800); } } else $("#rStage").scrollTop = 0;
 }
+$("#rPage").addEventListener("click", e => {
+  const v = e.target.closest(".v"); if(!v) return;
+  $$("#rPage .v.sel").forEach(x => x.classList.remove("sel")); v.classList.add("sel");
+  const id = +v.dataset.id, s = surahOf(id), a = id - START[s] + 1;
+  toast(`سورەتی ${Q[s][0]}، ئایەتی ${ku(a)}`, {label:"ناردن وەک وێنە", run:() => { $("#toast").hidden = true; v.classList.remove("sel");
+    shareCard({title:`سورەتی ${Q[s][0]} · ئایەتی ${ku(a)}`, ar:`${Q[s][3][a - 1]} ﴿${ku(a)}﴾`, quran:true, src:"قورئانی پیرۆز"}); }});
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("#toast").hidden = true; v.classList.remove("sel"); }, 5000);
+});
 function go(p, hl){ page = Math.max(1, Math.min(604, p)); renderPage(hl); }
 async function openReader(p, hl){
   await loadQuran();
@@ -298,14 +308,15 @@ function renderDuas(){
   const list = content.duas.filter(d => (dcat === "هەموو" || d.cat === dcat) && (!q || nrm(d.title + " " + d.ar + " " + d.ku).includes(q)));
   $("#dList").innerHTML = list.map(d => `<article class="card" data-id="${esc(d.id)}">
     <h3>${esc(d.title)}</h3><div class="ar" lang="ar">${esc(d.ar)}</div><div class="ku">${esc(d.ku)}</div>
-    <div class="foot"><span class="src">${esc(d.src || "")}</span><button class="mini share">${navigator.share ? "ناردن" : "کۆپی"}</button></div></article>`).join("")
+    <div class="foot"><span class="src">${esc(d.src || "")}</span><span class="acts"><button class="mini img">وەک وێنە</button><button class="mini share">${navigator.share ? "ناردن" : "کۆپی"}</button></span></div></article>`).join("")
     || '<div class="empty">هیچ دوعایەک نەدۆزرایەوە.</div>';
 }
 $("#dCats").onclick = e => { const b = e.target.closest("button"); if(b){ dcat = b.dataset.c; renderDuas(); } };
 $("#dSearch").oninput = renderDuas;
 $("#dList").onclick = async e => {
-  const b = e.target.closest(".share"); if(!b) return;
+  const b = e.target.closest(".share, .img"); if(!b) return;
   const d = content.duas.find(x => x.id === b.closest(".card").dataset.id); if(!d) return;
+  if(b.classList.contains("img")){ shareCard({title:d.title, ar:d.ar, ku:d.ku, src:d.src}); return; }
   const text = `${d.title}\n\n${d.ar}\n\n${d.ku}\n\n(${d.src || ""}) · یاوەری نوێژ`;
   if(navigator.share){ try{ await navigator.share({text}); }catch(_){} return; }
   try{ await navigator.clipboard.writeText(text); toast("کۆپی کرا"); }catch(_){ toast("کۆپی نەکرا"); }
@@ -405,7 +416,34 @@ function renderLog(){
   $("#lgQada").innerHTML = LP.map(p => `<div class="qrow"><span>${p.n}</span><button data-q="${p.k}" data-d="-1" aria-label="کەمکردنەوە">−</button><b class="num">${ku(qada[p.k] || 0)}</b><button data-q="${p.k}" data-d="1" aria-label="زیادکردن">+</button></div>`).join("")
     + `<div class="qrow total"><span>کۆی قەزا</span><b class="num">${ku(total)}</b></div>`;
   renderToolSubs();
+  renderNudge();
 }
+// Past days (since the log was first used) with prayers left unmarked: offer to move them to qada.
+let settled = store.get("pray.settled", {});
+function missed(){
+  const first = Object.keys(lg).filter(k => (lg[k] || []).some(Boolean)).sort()[0], out = [];
+  if(!first) return out;
+  daysBack(8).slice(1).forEach(d => { const k = isoKey(d); if(k < first) return;
+    const a = lg[k] || [], s = settled[k] || [];
+    LP.forEach((p, i) => { if(!a[i] && !s.includes(i)) out.push([k, i]); }); });
+  return out;
+}
+function renderNudge(){
+  const m = missed(), el = $("#lgNudge"); el.hidden = !m.length; if(!m.length) return;
+  el.innerHTML = `<b>${ku(m.length)} نوێژ لە ڕۆژانی ڕابردوودا نیشان نەکراون</b>
+    <p class="fine">ئەگەر نەتکردوون، بیانخە سەر لیستی قەزا. ئەگەر کردووتن و تەنها نیشانت نەکردوون، وەک کراو تۆماریان بکە.</p>
+    <div class="row2"><button class="btn primary" data-n="qada">بیانخە سەر قەزا</button><button class="btn" data-n="done">کردوومن</button></div>`;
+}
+$("#lgNudge").onclick = e => {
+  const b = e.target.closest("[data-n]"); if(!b) return;
+  const m = missed(), done = b.dataset.n === "done";
+  m.forEach(([k, i]) => {
+    if(done){ const a = lg[k] || [0, 0, 0, 0, 0]; a[i] = 1; lg[k] = a; }
+    else { (settled[k] || (settled[k] = [])).push(i); qada[LP[i].k] = (qada[LP[i].k] || 0) + 1; }
+  });
+  store.set("pray.log", lg); store.set("pray.settled", keepRecent(settled, 30)); store.set("pray.qada", qada);
+  toast(done ? "وەک کراو تۆمار کران" : `${ku(m.length)} نوێژ خرانە سەر قەزا`); renderLog();
+};
 $("#lgToday").onclick = e => { const b = e.target.closest("[data-i]"); if(b) toggleLog(isoKey(iraqNow()), +b.dataset.i); };
 $("#lgWeek").onclick = e => { const b = e.target.closest("button"); if(b) toggleLog(b.dataset.k, +b.dataset.i); };
 $("#lgQada").onclick = e => {
@@ -455,6 +493,129 @@ $("#zkForm").addEventListener("input", e => {
 });
 $("#zkForm").addEventListener("submit", e => e.preventDefault());
 $("#zkBasis").onclick = e => { const b = e.target.closest("button"); if(!b) return; zk.basis = b.dataset.b; store.set("zakat", zk); calcZakat(); };
+
+/* ================= KHATM PLAN ================= */
+// A page counts as read after 15 seconds on screen; khatm.done maps page -> the day it was read.
+let khatm = store.get("khatm", null), khSel = 30, readTimer;
+const KH_DAYS = [7, 15, 30, 60];
+function trackPage(p){
+  clearTimeout(readTimer);
+  if(!khatm || khatm.done[p]) return;
+  readTimer = setTimeout(() => {
+    if($("#reader").hidden || page !== p || !khatm) return;
+    khatm.done[p] = isoKey(iraqNow());
+    if(Object.keys(khatm.done).length >= 604 && !khatm.finished){
+      khatm.finished = true; store.set("khatm.n", store.get("khatm.n", 0) + 1);
+      toast("پیرۆزە! خەتمی قورئانت تەواو کرد");
+    }
+    store.set("khatm", khatm);
+  }, 15000);
+}
+const dayDiff = (a, b) => Math.round((new Date(b + "T12:00") - new Date(a + "T12:00")) / 864e5);
+function khatmStats(){
+  const k = isoKey(iraqNow()), done = Object.values(khatm.done), total = done.length;
+  const today = done.filter(d => d === k).length, before = total - today;
+  const day = dayDiff(khatm.start, k) + 1, left = Math.max(1, khatm.days - day + 1);
+  return {total, today, target:Math.ceil((604 - before) / left), day, late:day > khatm.days};
+}
+const firstUnread = () => { for(let p = 1; p <= 604; p++) if(!khatm.done[p]) return p; return 1; };
+function quranSub(){
+  const last = store.get("q.page", 0);
+  if(khatm && !khatm.finished){ const s = khatmStats(); $("#qkQuranSub").textContent = `خەتم: ئەمڕۆ ${ku(Math.min(s.today, s.target))} لە ${ku(s.target)} لاپەڕە`; }
+  else $("#qkQuranSub").textContent = last && Q ? `لاپەڕە ${ku(last)} · ${Q[surahOf(META.pages[last - 1])][0]}` : "دەست بە خوێندنەوە بکە";
+}
+function renderKhatm(){
+  const el = $("#khatm"), n = store.get("khatm.n", 0);
+  const doneNote = n ? `<p class="fine">تا ئێستا ${ku(n)} جار قورئانت خەتم کردووە.</p>` : "";
+  if(!khatm){
+    el.innerHTML = `<b>پلانی خەتمی قورئان</b>
+      <p class="fine">دیاری بکە لە چەند ڕۆژێکدا قورئان خەتم دەکەیت. ئەپەکە ڕۆژانە پێت دەڵێت چەند لاپەڕە بخوێنیت و ئەو لاپەڕانەی خوێندووتن خۆی دەژمێرێت.</p>
+      <div class="seg" role="group" aria-label="ماوەی خەتم">${KH_DAYS.map(d => `<button data-kd="${d}" aria-pressed="${d === khSel}">${ku(d)} ڕۆژ</button>`).join("")}</div>
+      <p class="fine">نزیکەی ${ku(Math.ceil(604 / khSel))} لاپەڕە لە ڕۆژێکدا.</p>
+      <button class="btn primary wide" data-kh="start">دەستپێکردنی پلان</button>${doneNote}`;
+  } else if(khatm.finished){
+    el.innerHTML = `<b>پیرۆزە! خەتمەکەت تەواو بوو</b><p class="fine">خوای گەورە لێت وەربگرێت.</p>${doneNote}<button class="btn primary wide" data-kh="new">خەتمێکی نوێ</button>`;
+  } else {
+    const s = khatmStats(), tp = Math.min(1, s.today / s.target);
+    el.innerHTML = `<div class="kh-h"><b>خەتم لە ${ku(khatm.days)} ڕۆژدا</b><span class="sub">ڕۆژی ${ku(Math.min(s.day, khatm.days))} لە ${ku(khatm.days)}</span></div>
+      <div class="kh-today${tp >= 1 ? " ok" : ""}"><span>ئەمڕۆ</span><b class="num">${ku(s.today)} <small>لە ${ku(s.target)} لاپەڕە</small></b></div>
+      <div class="pbar"><i style="width:${(tp * 100).toFixed(1)}%"></i></div>
+      <div class="kh-all"><span>هەموو</span><span class="num">${ku(s.total)} لە ٦٠٤ لاپەڕە</span></div>
+      <div class="pbar thin"><i style="width:${(s.total / 604 * 100).toFixed(1)}%"></i></div>
+      ${s.late ? '<p class="fine">ماوەی پلانەکەت تێپەڕی. بەردەوام بە تا تەواوی دەکەیت.</p>' : ""}
+      <button class="btn primary wide" data-kh="go">خوێندنەوە: لاپەڕە ${ku(firstUnread())}</button>
+      <button class="btn ghost" data-kh="stop">هەڵوەشاندنەوەی پلان</button>`;
+  }
+}
+$("#khatm").onclick = e => {
+  const d = e.target.closest("[data-kd]"); if(d){ khSel = +d.dataset.kd; renderKhatm(); return; }
+  const b = e.target.closest("[data-kh]"); if(!b) return;
+  const a = b.dataset.kh;
+  if(a === "start" || a === "new"){ khatm = {start:isoKey(iraqNow()), days:khSel, done:{}}; store.set("khatm", khatm); toast("پلانەکە دەستی پێکرد"); }
+  else if(a === "go"){ openReader(firstUnread()); return; }
+  else if(a === "stop"){ if(!confirm("پلانی خەتم هەڵبوەشێنرێتەوە؟")) return; khatm = null; store.set("khatm", null); }
+  renderKhatm(); quranSub();
+};
+
+/* ================= SHARE AS IMAGE ================= */
+const SITE = /\.github\.io$/.test(location.hostname) ? (location.host + location.pathname.replace(/index\.html$/, "")).replace(/\/$/, "") : "yawarinwezh.github.io";
+function wrapText(ctx, text, maxW){
+  const out = [];
+  for(const para of String(text).split("\n")){
+    let line = "";
+    for(const w of para.split(/\s+/).filter(Boolean)){
+      const t = line ? line + " " + w : w;
+      if(line && ctx.measureText(t).width > maxW){ out.push(line); line = w; } else line = t;
+    }
+    if(line) out.push(line);
+  }
+  return out;
+}
+// Draw a 1080×1350 card (Instagram/WhatsApp friendly) and hand it to the share sheet, or download it.
+async function shareCard(c){
+  toast("وێنەکە ئامادە دەکرێت…");
+  const W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const x = cv.getContext("2d"), arF = c.quran ? '"KFGQPC Hafs"' : '"Amiri"', ui = '"IBM Plex Sans Arabic", sans-serif';
+  const logo = new Image(); logo.src = "icons/icon-192.png";
+  try{ await Promise.all([document.fonts.load(`40px ${arF}`, "بسم"), document.fonts.load(`600 40px ${ui}`, "بسم"),
+    document.fonts.load(`400 40px ${ui}`, "بسم"), document.fonts.load(`400 26px ${ui}`, "abc"), logo.decode()]); }catch(_){}
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#0f5c4d"); g.addColorStop(1, "#082c25");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.strokeStyle = "rgba(201,162,74,.85)"; x.lineWidth = 3; x.strokeRect(44, 44, W - 88, H - 88);
+  x.strokeStyle = "rgba(201,162,74,.35)"; x.lineWidth = 1.5; x.strokeRect(58, 58, W - 116, H - 116);
+  if(logo.complete && logo.naturalWidth){ x.save(); x.beginPath(); x.roundRect?.(W / 2 - 42, 92, 84, 84, 20); x.clip(); x.drawImage(logo, W / 2 - 42, 92, 84, 84); x.restore(); }
+  x.direction = "rtl"; x.textAlign = "center"; x.textBaseline = "middle";
+  x.fillStyle = "#e9d6a0"; x.font = `600 38px ${ui}`; x.fillText(c.title || "", W / 2, 222);
+  // shrink the text until it fits between the title and the footer
+  const top = 280, bottom = H - 220, maxW = W - 200, aLH = c.quran ? 1.95 : 1.8, kLH = 1.75;
+  let as = c.quran ? 64 : 60, ks = 36, aL, kL, h;
+  for(;;){
+    x.font = `${as}px ${arF}`; aL = wrapText(x, c.ar, maxW);
+    x.font = `400 ${ks}px ${ui}`; kL = c.ku ? wrapText(x, c.ku, maxW) : [];
+    h = aL.length * as * aLH + kL.length * ks * kLH + (kL.length ? 60 : 0);
+    if(h <= bottom - top || as <= 26) break;
+    as -= 2; ks = Math.max(22, ks - 1);
+  }
+  let y = top + Math.max(0, (bottom - top - h) / 2);
+  x.fillStyle = "#fdf8ea"; x.font = `${as}px ${arF}`;
+  aL.forEach(l => { x.fillText(l, W / 2, y + as * aLH / 2); y += as * aLH; });
+  if(kL.length){
+    y += 30; x.fillStyle = "rgba(201,162,74,.6)"; x.fillRect(W / 2 - 60, y - 1, 120, 2); y += 30;
+    x.fillStyle = "rgba(253,248,234,.82)"; x.font = `400 ${ks}px ${ui}`;
+    kL.forEach(l => { x.fillText(l, W / 2, y + ks * kLH / 2); y += ks * kLH; });
+  }
+  if(c.src){ x.fillStyle = "#e9d6a0"; x.font = `400 30px ${ui}`; x.fillText(c.src, W / 2, H - 180); }
+  x.fillStyle = "#fdf8ea"; x.font = `600 34px ${ui}`; x.fillText("یاوەری نوێژ", W / 2, H - 126);
+  x.direction = "ltr"; x.fillStyle = "rgba(253,248,234,.7)"; x.font = `400 26px ${ui}`; x.fillText(SITE, W / 2, H - 86);
+  const blob = await new Promise(r => cv.toBlob(r, "image/png"));
+  $("#toast").hidden = true;
+  if(!blob){ toast("وێنەکە دروست نەکرا"); return; }
+  const file = new File([blob], "yawari-nwezh.png", {type:"image/png"});
+  if(navigator.canShare?.({files:[file]})){ try{ await navigator.share({files:[file], text:`یاوەری نوێژ: https://${SITE}`}); }catch(_){} return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name;
+  document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("وێنەکە دابەزێنرا");
+}
 
 /* ================= SETTINGS + SUGGESTIONS ================= */
 function fillPlaces(){
@@ -520,7 +681,7 @@ applyTheme(store.get("theme", "auto"));
 buildRose();
 renderHome(true); renderAdhkar(); renderDuas(); renderQibla(); route();
 setInterval(() => renderHome(false), 1000);
-loadQuran().then(() => { $("#qkQuranSub").textContent = store.get("q.page", 0) ? `لاپەڕە ${ku(store.get("q.page", 0))} · ${Q[surahOf(META.pages[store.get("q.page", 1) - 1])][0]}` : "دەست بە خوێندنەوە بکە"; }).catch(() => {});
+loadQuran().then(quranSub).catch(() => {});
 
 if(firebaseReady){
   const sync = () => refreshContent().then(c => {
