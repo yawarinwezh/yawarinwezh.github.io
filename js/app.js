@@ -54,6 +54,7 @@ function renderHome(force){
       ? `سەرچاوە: خشتەی کاتەکانی بانگی ${c.id === "gps" ? c.near : c.n} (کەناڵی ئامۆژگاری)`
       : `حیسابی ئەستێرەناسی: ${m.n} · عەسر: ${+cfg().asr === 2 ? "حەنەفی" : "شافیعی"}`) + ` · کاتی عێراق (UTC+3)${cfg().note ? " · " + cfg().note : ""}`;
     renderMonth();
+    renderToolSubs();
   }
   // countdown
   let s = Math.max(0, Math.floor((n.at - now) / 1000));
@@ -310,6 +311,151 @@ $("#dList").onclick = async e => {
   try{ await navigator.clipboard.writeText(text); toast("کۆپی کرا"); }catch(_){ toast("کۆپی نەکرا"); }
 };
 
+/* ================= TOOLS: shared helpers ================= */
+const isoKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const daysBack = n => { const t = iraqNow(); return Array.from({length:n}, (_, i) => new Date(t.getFullYear(), t.getMonth(), t.getDate() - i, 12)); };
+const dayLabel = (d, i) => i === 0 ? "ئەمڕۆ" : i === 1 ? "دوێنێ" : `${WD[d.getDay()]} ${ku(d.getDate())}`;
+const fmt = (n, dp = 0) => ku(n.toLocaleString("en", {maximumFractionDigits:dp})).replace(/,/g, "٬").replace(/\./g, "٫");
+const parseNum = s => +fromKu(String(s)).replace(/[,٬\s]/g, "").replace(/٫/g, ".") || 0;
+const keepRecent = (log, days) => { const cut = isoKey(daysBack(days)[days - 1]); for(const k in log) if(k < cut) delete log[k]; return log; };
+function renderToolSubs(){
+  const tb = tbLog[isoKey(iraqNow())] || {}, total = Object.values(tb).reduce((a, b) => a + b, 0);
+  $("#tkTasbih").textContent = total ? `ئەمڕۆ ${ku(total)}` : "ژمێرەری زیکر";
+  const s = streak(), today = (lg[isoKey(iraqNow())] || []).filter(Boolean).length;
+  $("#tkLog").textContent = s ? `زنجیرە: ${ku(s)} ڕۆژ` : `ئەمڕۆ ${ku(today)} لە ٥`;
+}
+
+/* ================= TASBIH ================= */
+const DHIKR = [
+  {ar:"سُبْحَانَ اللَّهِ", n:"سبحان الله"},
+  {ar:"الْحَمْدُ لِلَّهِ", n:"الحمد لله"},
+  {ar:"اللَّهُ أَكْبَرُ", n:"الله أكبر"},
+  {ar:"لَا إِلَٰهَ إِلَّا اللَّهُ", n:"لا إله إلا الله"},
+  {ar:"أَسْتَغْفِرُ اللَّهَ", n:"أستغفر الله"},
+  {ar:"سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", n:"سبحان الله وبحمده"},
+  {ar:"لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ", n:"لا حول ولا قوة إلا بالله"},
+  {ar:"اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ", n:"صلوات"}
+];
+let tb = Object.assign({d:0, t:33, c:0, r:0}, store.get("tb", {}));
+let tbLog = store.get("tb.log", {});
+const TB_C = 2 * Math.PI * 54;
+function renderTasbih(){
+  if(!DHIKR[tb.d]) tb.d = 0;
+  $("#tbDhikr").innerHTML = DHIKR.map((x, i) => `<button aria-pressed="${i === tb.d}" data-i="${i}">${esc(x.n)}</button>`).join("");
+  $$("#tbTarget button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.t === tb.t)));
+  $("#tbAr").textContent = DHIKR[tb.d].ar;
+  renderTbCount(); renderTbLog();
+}
+function renderTbLog(){
+  const days = daysBack(7), totals = days.map(d => Object.values(tbLog[isoKey(d)] || {}).reduce((a, b) => a + b, 0));
+  const max = Math.max(1, ...totals);
+  $("#tbLog").innerHTML = days.map((d, i) => `<div class="row"><span>${dayLabel(d, i)}</span><i style="width:${(totals[i] / max * 100).toFixed(1)}%"></i><b class="num">${ku(totals[i])}</b></div>`).join("");
+  $("#tbToday").textContent = `ئەمڕۆ ${ku(totals[0])} زیکر`;
+}
+function renderTbCount(){
+  $("#tbN").textContent = ku(tb.c);
+  $("#tbOf").textContent = tb.t ? `لە ${ku(tb.t)}` : "";
+  $("#tbRounds").textContent = tb.r ? `${ku(tb.r)} خول تەواو بووە` : "";
+  const ring = $("#tbRing");
+  ring.setAttribute("stroke-dasharray", TB_C.toFixed(2));
+  ring.setAttribute("stroke-dashoffset", (TB_C * (1 - (tb.t ? tb.c / tb.t : (tb.c % 100) / 100))).toFixed(2));
+}
+$("#tbDhikr").onclick = e => { const b = e.target.closest("button"); if(!b) return; tb.d = +b.dataset.i; tb.c = 0; tb.r = 0; store.set("tb", tb); renderTasbih(); };
+$("#tbTarget").onclick = e => { const b = e.target.closest("button"); if(!b) return; tb.t = +b.dataset.t; tb.c = 0; tb.r = 0; store.set("tb", tb); renderTasbih(); };
+$("#tbBtn").onclick = () => {
+  if(tb.t && tb.c >= tb.t) tb.c = 0;
+  tb.c++;
+  const k = isoKey(iraqNow()), day = tbLog[k] || (tbLog[k] = {});
+  day[tb.d] = (day[tb.d] || 0) + 1;
+  const done = tb.t && tb.c === tb.t;
+  if(done){ tb.r++; toast("خولێک تەواو بوو"); }
+  try{ navigator.vibrate?.(done ? [40, 60, 40] : 12); }catch(_){}
+  store.set("tb", tb); store.set("tb.log", keepRecent(tbLog, 60));
+  renderTbCount(); renderTbLog(); renderToolSubs();
+};
+$("#tbReset").onclick = () => { tb.c = 0; tb.r = 0; store.set("tb", tb); renderTasbih(); };
+
+/* ================= PRAYER LOG ================= */
+const LP = PRAYERS.filter(p => !p.sun);
+let lg = store.get("pray.log", {});
+let qada = store.get("pray.qada", {});
+const full = k => (lg[k] || []).filter(Boolean).length === 5;
+// Consecutive days with all five prayers marked; today counts once it is complete.
+function streak(){
+  const days = daysBack(400); let i = full(isoKey(days[0])) ? 0 : 1, n = 0;
+  while(i < days.length && full(isoKey(days[i]))){ n++; i++; }
+  return n;
+}
+function toggleLog(k, i){
+  const a = lg[k] || [0, 0, 0, 0, 0]; a[i] = a[i] ? 0 : 1; lg[k] = a;
+  store.set("pray.log", keepRecent(lg, 400));
+  try{ navigator.vibrate?.(10); }catch(_){}
+  renderLog();
+}
+const CHECK = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+function renderLog(){
+  const days = daysBack(7), tk = isoKey(days[0]), today = lg[tk] || [];
+  const s = streak();
+  $("#lgStreak").innerHTML = `<span class="big num">${ku(s)}</span><span><b>ڕۆژ بە دوای یەکدا</b><small>${s ? "هەر پێنج نوێژەکەت کردووە. بەردەوام بە!" : "هەر پێنج نوێژی ئەمڕۆ نیشان بکە بۆ دەستپێکردنی زنجیرەکەت."}</small></span>`;
+  $("#lgSub").textContent = `ئەمڕۆ ${ku(today.filter(Boolean).length)} لە ٥`;
+  $("#lgToday").innerHTML = LP.map((p, i) => `<button class="lg-p" data-i="${i}" aria-pressed="${!!today[i]}"><span class="dot">${CHECK}</span>${p.n}</button>`).join("");
+  $("#lgWeek").innerHTML = days.map((d, j) => { const k = isoKey(d), a = lg[k] || [];
+    return `<tr${j === 0 ? ' class="today"' : ""}><td>${dayLabel(d, j)}</td>${LP.map((p, i) => `<td><button data-k="${k}" data-i="${i}" aria-pressed="${!!a[i]}" aria-label="${p.n}، ${dayLabel(d, j)}"></button></td>`).join("")}</tr>`; }).join("");
+  const total = LP.reduce((a, p) => a + (qada[p.k] || 0), 0);
+  $("#lgQada").innerHTML = LP.map(p => `<div class="qrow"><span>${p.n}</span><button data-q="${p.k}" data-d="-1" aria-label="کەمکردنەوە">−</button><b class="num">${ku(qada[p.k] || 0)}</b><button data-q="${p.k}" data-d="1" aria-label="زیادکردن">+</button></div>`).join("")
+    + `<div class="qrow total"><span>کۆی قەزا</span><b class="num">${ku(total)}</b></div>`;
+  renderToolSubs();
+}
+$("#lgToday").onclick = e => { const b = e.target.closest("[data-i]"); if(b) toggleLog(isoKey(iraqNow()), +b.dataset.i); };
+$("#lgWeek").onclick = e => { const b = e.target.closest("button"); if(b) toggleLog(b.dataset.k, +b.dataset.i); };
+$("#lgQada").onclick = e => {
+  const b = e.target.closest("[data-q]"); if(!b) return;
+  qada[b.dataset.q] = Math.max(0, (qada[b.dataset.q] || 0) + +b.dataset.d);
+  store.set("pray.qada", qada); renderLog();
+};
+$("#lgAddDays").onclick = () => {
+  const n = Math.floor(parseNum($("#lgDays").value));
+  if(n < 1 || n > 36500){ toast("ژمارەی ڕۆژەکان بنووسە"); return; }
+  LP.forEach(p => qada[p.k] = (qada[p.k] || 0) + n);
+  store.set("pray.qada", qada); $("#lgDays").value = ""; renderLog();
+  toast(`${ku(n)} ڕۆژ زیاد کرا`);
+};
+
+/* ================= ZAKAT ================= */
+const ZK = ["cur", "goldP", "silverP", "cash", "gold", "karat", "silver", "trade", "lent", "debt"];
+const zkId = k => "#zk" + k[0].toUpperCase() + k.slice(1);
+let zk = Object.assign({cur:"دینار", karat:"21", basis:"gold"}, store.get("zakat", {}));
+function fillZakat(){
+  ZK.forEach(k => { if(zk[k] != null) $(zkId(k)).value = zk[k]; });
+  calcZakat();
+}
+function calcZakat(){
+  const v = k => parseNum(zk[k] || 0), cur = zk.cur, dp = cur === "دینار" ? 0 : 2;
+  $$("#zkBasis button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.b === zk.basis)));
+  const goldVal = v("gold") * (+zk.karat || 24) / 24 * v("goldP"), silverVal = v("silver") * v("silverP");
+  const total = v("cash") + goldVal + silverVal + v("trade") + v("lent") - v("debt");
+  const price = zk.basis === "silver" ? v("silverP") : v("goldP");
+  const nisab = zk.basis === "silver" ? 595 * price : 85 * price;
+  const money = n => `${fmt(n, dp)} ${cur}`;
+  let html = `<div class="line"><span>کۆی ماڵی زەکاتدار</span><b class="num">${money(Math.max(0, total))}</b></div>`;
+  if(goldVal) html += `<div class="line"><span>بەهای زێڕ</span><b class="num">${money(goldVal)}</b></div>`;
+  if(!price){
+    html += `<div class="due"><small>بۆ زانینی نیساب، نرخی یەک گرام ${zk.basis === "silver" ? "زیو" : "زێڕی ٢٤"}ی ئەمڕۆ بنووسە.</small></div>`;
+  } else {
+    html += `<div class="line"><span>نیساب (${zk.basis === "silver" ? "٥٩٥ گرام زیو" : "٨٥ گرام زێڕ"})</span><b class="num">${money(nisab)}</b></div>`;
+    html += total >= nisab && total > 0
+      ? `<div class="due"><small>زەکاتەکەت (٢٫٥٪)</small><b class="num">${money(total * 0.025)}</b></div>`
+      : `<div class="due"><small>ماڵەکەت نەگەیشتووەتە نیساب، بۆیە زەکاتت لەسەر نییە.</small></div>`;
+  }
+  $("#zkRes").innerHTML = html;
+}
+$("#zkForm").addEventListener("input", e => {
+  const k = ZK.find(k => zkId(k) === "#" + e.target.id); if(!k) return;
+  zk[k] = e.target.value; store.set("zakat", zk); calcZakat();
+});
+$("#zkForm").addEventListener("submit", e => e.preventDefault());
+$("#zkBasis").onclick = e => { const b = e.target.closest("button"); if(!b) return; zk.basis = b.dataset.b; store.set("zakat", zk); calcZakat(); };
+
 /* ================= SETTINGS + SUGGESTIONS ================= */
 function fillPlaces(){
   const sel = store.get("place", {id:"erbil"});
@@ -352,7 +498,7 @@ $("#sgForm").onsubmit = async e => {
 };
 
 /* ================= ROUTING ================= */
-const VIEWS = ["home", "quran", "qibla", "adhkar", "duas"];
+const VIEWS = ["home", "quran", "qibla", "adhkar", "duas", "tasbih", "log", "zakat"];
 function route(){
   const h = location.hash.slice(1);
   if(h === "read"){ if($("#reader").hidden) openReader(); return; }
@@ -362,6 +508,9 @@ function route(){
   $$("[data-nav]").forEach(a => { if(a.dataset.nav === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   if(v === "quran") loadQuran().then(renderIndex).catch(() => $("#slist").innerHTML = '<div class="empty">قورئان بار نەبوو. پەڕەکە نوێ بکەرەوە.</div>');
   if(v === "qibla") renderQibla();
+  if(v === "tasbih") renderTasbih();
+  if(v === "log") renderLog();
+  if(v === "zakat") fillZakat();
   scrollTo(0, 0);
 }
 addEventListener("hashchange", route);

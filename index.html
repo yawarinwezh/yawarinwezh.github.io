@@ -60,6 +60,12 @@
         <a class="qcard" href="#adhkar" id="qkAdhkar"><span class="qk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"/><circle cx="17.3" cy="6.7" r="1.6"/><circle cx="19.5" cy="12" r="1.6"/><circle cx="17.3" cy="17.3" r="1.6"/><circle cx="6.7" cy="6.7" r="1.6"/><circle cx="4.5" cy="12" r="1.6"/><circle cx="6.7" cy="17.3" r="1.6"/><path d="M12 19.5v3"/></svg></span><span><b id="qkAdhkarT">ئەزکاری بەیانیان</b><small id="qkAdhkarSub"></small></span></a>
       </div>
 
+      <div class="tools">
+        <a class="tcard" href="#tasbih"><span class="qk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"/><circle cx="17.3" cy="6.7" r="1.6"/><circle cx="19.5" cy="12" r="1.6"/><circle cx="17.3" cy="17.3" r="1.6"/><circle cx="6.7" cy="6.7" r="1.6"/><circle cx="4.5" cy="12" r="1.6"/><circle cx="6.7" cy="17.3" r="1.6"/><path d="M12 19.5v3"/></svg></span><b>تەسبیح</b><small id="tkTasbih"></small></a>
+        <a class="tcard" href="#log"><span class="qk-ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M9 15l2 2 4-4"/></svg></span><b>تۆماری نوێژ</b><small id="tkLog"></small></a>
+        <a class="tcard" href="#zakat"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M9.5 16.4c.9 1.2 3.2 2.1 6 2.1 3 0 5.5-1.1 5.5-2.5v-4c0-1.4-2.5-2.5-5.5-2.5"/></svg></span><b>زەکات‌ژمێر</b><small>زەکاتی ساڵانە</small></a>
+      </div>
+
       <details class="month" id="monthBox">
         <summary>خشتەی کاتەکانی ٣٠ ڕۆژی داهاتوو</summary>
         <div class="tbl"><table><thead><tr><th>ڕۆژ</th><th>بەیانی</th><th>خۆرهەڵاتن</th><th>نیوەڕۆ</th><th>عەسر</th><th>ئێوارە</th><th>خەوتنان</th></tr></thead><tbody id="monthBody"></tbody></table></div>
@@ -126,6 +132,93 @@
       <div class="chips" id="dCats"></div>
       <div class="cards" id="dList"></div>
       <button class="suggest-cta" id="openSuggest"><span><b>بیرۆکە یان دوعایەکت هەیە؟</b><small>پێشنیارەکەت بۆ بەڕێوەبەر بنێرە</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+    </section>
+
+    <!-- TASBIH -->
+    <section class="view" id="v-tasbih" data-view="tasbih" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>تەسبیح</h1><span class="sub" id="tbToday"></span></div>
+      <div class="chips" id="tbDhikr"></div>
+      <div class="seg" role="group" aria-label="ژمارەی خول" id="tbTarget">
+        <button data-t="33">٣٣</button>
+        <button data-t="99">٩٩</button>
+        <button data-t="100">١٠٠</button>
+        <button data-t="0">بێ سنوور</button>
+      </div>
+      <div class="tb-wrap">
+        <div class="tb-ar" id="tbAr" lang="ar"></div>
+        <button class="tb-btn" id="tbBtn" aria-label="ژماردن">
+          <svg class="tb-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="bg" cx="60" cy="60" r="54"/><circle class="fg" id="tbRing" cx="60" cy="60" r="54" transform="rotate(-90 60 60)"/></svg>
+          <span class="tb-n num" id="tbN">٠</span><span class="tb-of" id="tbOf"></span>
+        </button>
+        <div class="tb-meta"><span id="tbRounds"></span><button class="mini" id="tbReset">سفرکردنەوە</button></div>
+      </div>
+      <div class="panel">
+        <b>تۆماری ٧ ڕۆژی ڕابردوو</b>
+        <div class="bars" id="tbLog"></div>
+      </div>
+    </section>
+
+    <!-- PRAYER LOG -->
+    <section class="view" id="v-log" data-view="log" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>تۆماری نوێژ</h1><span class="sub" id="lgSub"></span></div>
+      <div class="streak" id="lgStreak"></div>
+      <div class="panel">
+        <b>نوێژەکانی ئەمڕۆ</b>
+        <div class="lg-today" id="lgToday"></div>
+      </div>
+      <div class="panel">
+        <b>٧ ڕۆژی ڕابردوو</b>
+        <p class="fine">بۆ ڕاستکردنەوەی ڕۆژێکی پێشوو، کلیک لە بازنەکە بکە.</p>
+        <div class="tbl"><table class="lg-week"><thead><tr><th>ڕۆژ</th><th>بەیانی</th><th>نیوەڕۆ</th><th>عەسر</th><th>ئێوارە</th><th>خەوتنان</th></tr></thead><tbody id="lgWeek"></tbody></table></div>
+      </div>
+      <div class="panel">
+        <b>نوێژی قەزا</b>
+        <p class="fine">ژمارەی ئەو نوێژانەی کە قەزات لەسەرە. هەر کاتێک قەزایەکت کردەوە، دوگمەی <b>−</b> دابگرە.</p>
+        <div class="qada" id="lgQada"></div>
+        <div class="qada-add">
+          <label class="field" for="lgDays">زیادکردنی چەند ڕۆژێکی تەواو (هەر پێنج نوێژ)<input id="lgDays" type="text" inputmode="numeric" placeholder="بۆ نموونە ٣٠"></label>
+          <button class="btn" id="lgAddDays" type="button">زیادکردن</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZAKAT -->
+    <section class="view" id="v-zakat" data-view="zakat" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>زەکات‌ژمێر</h1><span class="sub">٢٫٥٪ی ماڵی گەیشتوو بە نیساب</span></div>
+      <form class="panel zk" id="zkForm" autocomplete="off">
+        <label class="field" for="zkCur">دراو<select id="zkCur"><option value="دینار">دیناری عێراقی</option><option value="دۆلار">دۆلاری ئەمریکی</option><option value="یۆرۆ">یۆرۆ</option></select></label>
+        <b class="zk-h">نرخی ئەمڕۆ</b>
+        <div class="row2">
+          <label class="field" for="zkGoldP">نرخی یەک گرام زێڕی ٢٤<input id="zkGoldP" inputmode="decimal"></label>
+          <label class="field" for="zkSilverP">نرخی یەک گرام زیو<input id="zkSilverP" inputmode="decimal"></label>
+        </div>
+        <b class="zk-h">ماڵەکەت</b>
+        <label class="field" for="zkCash">پارەی نەختینە و بانک<input id="zkCash" inputmode="decimal"></label>
+        <div class="row2">
+          <label class="field" for="zkGold">زێڕ (گرام)<input id="zkGold" inputmode="decimal"></label>
+          <label class="field" for="zkKarat">عەیاری زێڕ<select id="zkKarat"><option value="24">٢٤</option><option value="22">٢٢</option><option value="21" selected>٢١</option><option value="18">١٨</option></select></label>
+        </div>
+        <label class="field" for="zkSilver">زیو (گرام)<input id="zkSilver" inputmode="decimal"></label>
+        <label class="field" for="zkTrade">نرخی کاڵای بازرگانی (بۆ فرۆشتن)<input id="zkTrade" inputmode="decimal"></label>
+        <label class="field" for="zkLent">قەرزی لای خەڵک کە چاوەڕێی گەڕانەوەی دەکەیت<input id="zkLent" inputmode="decimal"></label>
+        <label class="field" for="zkDebt">قەرزی سەرت کە ئێستا دەبێت بیدەیتەوە (کەم دەکرێتەوە)<input id="zkDebt" inputmode="decimal"></label>
+        <div class="field">نیساب بە پێی
+          <div class="seg" role="group" aria-label="نیساب" id="zkBasis">
+            <button type="button" data-b="gold">زێڕ (٨٥ گرام)</button>
+            <button type="button" data-b="silver">زیو (٥٩٥ گرام)</button>
+          </div>
+        </div>
+      </form>
+      <div class="zk-res" id="zkRes"></div>
+      <div class="tip">
+        <b>تێبینی</b>
+        <ul>
+          <li>زەکات کاتێک واجبە کە ماڵەکەت بگاتە نیساب و ساڵێکی کۆچی تەواوی بەسەردا تێپەڕێت.</li>
+          <li>خانووی نیشتەجێبوون، ئۆتۆمبێل و کەلوپەلی ماڵ زەکاتیان لەسەر نییە.</li>
+          <li>دەربارەی خشڵی ئافرەت کە بەکاردەهێنرێت، زانایان ڕاجیاوازن: لە مەزهەبی شافیعیدا زەکاتی لەسەر نییە، لە مەزهەبی حەنەفیدا هەیە.</li>
+          <li>ئەمە تەنها ژمێرەرە. بۆ حاڵەتی تایبەت پرسیار لە مامۆستایەکی ئایینی بکە.</li>
+        </ul>
+      </div>
     </section>
   </main>
 
