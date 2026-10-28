@@ -24,13 +24,19 @@ export function t12(d, html = true){
   return html ? `${ku(h)}:${ku(pad(m))}<small>${sfx}</small>` : `${ku(h)}:${ku(pad(m))}`;
 }
 export const gdate = d => `${WD[d.getDay()]}، ${ku(d.getDate())}ی ${GM[d.getMonth()]} ${ku(d.getFullYear())}`;
-export function hijri(d, offset = 0){
+// Umm al-Qura date {d, m, y} (m is 1..12); offset shifts it by whole days for local moon sighting.
+let hfmt = null;
+export function hijriYMD(d, offset = 0){
   try{
-    const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate() + (+offset || 0), 12));
-    const parts = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura-nu-latn", {day:"numeric", month:"numeric", year:"numeric", timeZone:"UTC"}).formatToParts(x);
+    hfmt = hfmt || new Intl.DateTimeFormat("en-u-ca-islamic-umalqura-nu-latn", {day:"numeric", month:"numeric", year:"numeric", timeZone:"UTC"});
+    const parts = hfmt.formatToParts(new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate() + (+offset || 0), 12)));
     const g = t => +parts.find(p => p.type === t).value;
-    return `${ku(g("day"))}ی ${HM[g("month") - 1]} ${ku(g("year"))}ی کۆچی`;
-  }catch(e){ return ""; }
+    return {d:g("day"), m:g("month"), y:g("year")};
+  }catch(e){ return null; }
+}
+export function hijri(d, offset = 0){
+  const h = hijriYMD(d, offset);
+  return h ? `${ku(h.d)}ی ${HM[h.m - 1]} ${ku(h.y)}ی کۆچی` : "";
 }
 
 /* ---------- places ---------- */

@@ -1,5 +1,5 @@
 import {
-  store, ku, fromKu, pad, esc, t12, gdate, hijri, CITIES, PRAYERS, METHODS, place, iraqNow, prayerTimes, nextPrayer,
+  store, ku, fromKu, pad, esc, t12, gdate, hijri, hijriYMD, GM, HM, CITIES, PRAYERS, METHODS, place, iraqNow, prayerTimes, nextPrayer,
   qiblaBearing, distKm, sunQiblaTime, cachedContent, refreshContent, firebaseReady, sendSuggestion, WD, tableId
 } from "./core.js";
 
@@ -55,11 +55,14 @@ function renderHome(force){
       : `حیسابی ئەستێرەناسی: ${m.n} · عەسر: ${+cfg().asr === 2 ? "حەنەفی" : "شافیعی"}`) + ` · کاتی عێراق (UTC+3)${cfg().note ? " · " + cfg().note : ""}`;
     renderMonth();
     renderToolSubs();
+    renderBanners(now, t);
+    renderAotd();
   }
   // countdown
   let s = Math.max(0, Math.floor((n.at - now) / 1000));
   const h = Math.floor(s / 3600); s -= h * 3600; const mi = Math.floor(s / 60); s -= mi * 60;
   $("#countdown").textContent = ku(`${pad(h)}:${pad(mi)}:${pad(s)}`);
+  tickRamadan(now, t);
   // sun/moon position on the arc
   const sky = $("#sky");
   const day = now >= t.sunrise && now < t.maghrib;
@@ -100,7 +103,9 @@ function loadQuran(){
 const surahOf = id => { let lo = 0, hi = 113; while(lo < hi){ const mid = (lo + hi + 1) >> 1; if(START[mid] <= id) lo = mid; else hi = mid - 1; } return lo; };
 const pageOf = id => { let lo = 0, hi = 603; while(lo < hi){ const mid = (lo + hi + 1) >> 1; if(META.pages[mid] <= id) lo = mid; else hi = mid - 1; } return lo + 1; };
 const juzOf = id => { let j = 0; while(j < 29 && META.juz[j + 1] <= id) j++; return j + 1; };
-let qtab = "surah";
+let qtab = "surah", NQ = null;
+const verseRow = id => { const s = surahOf(id), a = id - START[s] + 1, t = Q[s][3][a - 1];
+  return `<button class="srow" data-page="${pageOf(id)}" data-hl="${id}"><span class="sno num">${ku(a)}</span><span class="smid"><b>${esc(Q[s][0])} · ئایەتی ${ku(a)}</b><small class="vprev">${esc(t.length > 90 ? t.slice(0, 90) + "…" : t)}</small></span></button>`; };
 function renderIndex(){
   const qs = $("#qSearch").value.trim(), n = +fromKu(qs);
   let rows = "";
@@ -109,6 +114,15 @@ function renderIndex(){
     const nq = norm(qs);
     rows += Q.map((s, i) => ({s, i})).filter(({s, i}) => !qs || n === i + 1 || norm(s[0]).includes(nq) || s[1].toLowerCase().includes(nq))
       .map(({s, i}) => `<button class="srow" data-page="${pageOf(START[i])}" data-sura="${i}"><span class="sno num">${ku(i + 1)}</span><span class="smid"><b>${esc(s[0])}</b><small>${s[2] ? "مەککی" : "مەدەنی"} · ${ku(s[3].length)} ئایەت · لاپەڕە ${ku(pageOf(START[i]))}</small></span></button>`).join("");
+    // word search through the whole Quran (diacritics ignored)
+    if(nq.length >= 3 && !n){
+      NQ = NQ || Q.flatMap(x => x[3].map(norm));
+      const hits = []; NQ.forEach((t, i) => { if(t.includes(nq)) hits.push(i + 1); });
+      rows += `<div class="shead">${hits.length ? `${ku(hits.length)} ئایەت ئەم وشەیەیان تێدایە${hits.length > 60 ? " (یەکەم ٦٠)" : ""}` : "لە ئایەتەکاندا نەدۆزرایەوە"}</div>`;
+      rows += hits.slice(0, 60).map(verseRow).join("");
+    }
+  } else if(qtab === "marks"){
+    rows += marks.length ? marks.map(verseRow).join("") : '<div class="empty">هیچ ئایەتێکت نیشان نەکردووە.<br><small>لە کاتی خوێندنەوەدا کلیک لە ئایەتێک بکە و «نیشانکردن» هەڵبژێرە.</small></div>';
   } else {
     rows += META.juz.map((id, j) => { const s = surahOf(id), a = id - START[s] + 1, p = pageOf(id);
       return `<button class="srow" data-page="${p}"><span class="sno num">${ku(j + 1)}</span><span class="smid"><b>جوزئی ${ku(j + 1)}</b><small>${esc(Q[s][0])}، ئایەتی ${ku(a)} · لاپەڕە ${ku(p)}</small></span></button>`; }).join("");
@@ -125,7 +139,7 @@ function renderIndex(){
 }
 $$("[data-qtab]").forEach(b => b.onclick = () => { qtab = b.dataset.qtab; $$("[data-qtab]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderIndex(); });
 $("#qSearch").oninput = () => Q && renderIndex();
-$("#slist").onclick = e => { const b = e.target.closest("[data-page]"); if(b) openReader(+b.dataset.page, b.dataset.sura != null ? START[+b.dataset.sura] : null); };
+$("#slist").onclick = e => { const b = e.target.closest("[data-page]"); if(b) openReader(+b.dataset.page, b.dataset.hl ? +b.dataset.hl : b.dataset.sura != null ? START[+b.dataset.sura] : null); };
 $("#qContinue").onclick = () => openReader(+$("#qContinue").dataset.page);
 
 let page = 1, wake = null;
@@ -140,7 +154,7 @@ function renderPage(hl){
       html += `<div class="s-head">سُورَةُ ${esc(Q[s][0])}</div>`;
       if(s !== 0 && s !== 8) html += `<div class="basm">${BASM}</div>`;
     }
-    run.push(`<span class="v${id === hl ? " hl" : ""}" data-id="${id}">${Q[s][3][a - 1]} ${ku(a)}</span>`);
+    run.push(`<span class="v${id === hl ? " hl" : ""}${marks.includes(id) ? " mk" : ""}" data-id="${id}">${Q[s][3][a - 1]} ${ku(a)}</span>`);
   }
   flush();
   const s0 = surahOf(from);
@@ -153,15 +167,29 @@ function renderPage(hl){
   trackPage(page);
   if(hl){ const el = $("#rPage .v.hl"); if(el){ setTimeout(() => el.scrollIntoView({block:"center"}), 30); setTimeout(() => el.classList.remove("hl"), 1800); } } else $("#rStage").scrollTop = 0;
 }
+// Tap an ayah: bookmark it, share it as an image, or copy it.
+let marks = store.get("q.marks", []), vsel = null;
 $("#rPage").addEventListener("click", e => {
   const v = e.target.closest(".v"); if(!v) return;
   $$("#rPage .v.sel").forEach(x => x.classList.remove("sel")); v.classList.add("sel");
-  const id = +v.dataset.id, s = surahOf(id), a = id - START[s] + 1;
-  toast(`سورەتی ${Q[s][0]}، ئایەتی ${ku(a)}`, {label:"ناردن وەک وێنە", run:() => { $("#toast").hidden = true; v.classList.remove("sel");
-    shareCard({title:`سورەتی ${Q[s][0]} · ئایەتی ${ku(a)}`, ar:`${Q[s][3][a - 1]} ﴿${ku(a)}﴾`, quran:true, src:"قورئانی پیرۆز"}); }});
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => { $("#toast").hidden = true; v.classList.remove("sel"); }, 5000);
+  vsel = +v.dataset.id; const s = surahOf(vsel), a = vsel - START[s] + 1;
+  $("#vbTitle").textContent = `سورەتی ${Q[s][0]}، ئایەتی ${ku(a)}`;
+  $("#vbMark").textContent = marks.includes(vsel) ? "لابردنی نیشان" : "نیشانکردن";
+  $("#vbar").hidden = false;
 });
-function go(p, hl){ page = Math.max(1, Math.min(604, p)); renderPage(hl); }
+function closeVbar(){ $("#vbar").hidden = true; $$("#rPage .v.sel").forEach(x => x.classList.remove("sel")); vsel = null; }
+$("#vbar").onclick = async e => {
+  const b = e.target.closest("[data-va]"); if(!b || vsel == null) return;
+  const id = vsel, s = surahOf(id), a = id - START[s] + 1, act = b.dataset.va;
+  if(act === "mark"){
+    const on = !marks.includes(id);
+    marks = on ? [...marks, id].sort((x, y) => x - y) : marks.filter(x => x !== id); store.set("q.marks", marks);
+    $(`#rPage .v[data-id="${id}"]`)?.classList.toggle("mk", on); toast(on ? "ئایەتەکە نیشان کرا" : "نیشانەکە لابرا");
+  } else if(act === "img") shareCard({title:`سورەتی ${Q[s][0]} · ئایەتی ${ku(a)}`, ar:`${Q[s][3][a - 1]} ﴿${ku(a)}﴾`, quran:true, src:"قورئانی پیرۆز"});
+  else if(act === "copy"){ try{ await navigator.clipboard.writeText(`${Q[s][3][a - 1]} ﴿${a}﴾\n(سورەتی ${Q[s][0]}، ئایەتی ${a})`); toast("کۆپی کرا"); }catch(_){ toast("کۆپی نەکرا"); } }
+  closeVbar();
+};
+function go(p, hl){ closeVbar(); page = Math.max(1, Math.min(604, p)); renderPage(hl); }
 async function openReader(p, hl){
   await loadQuran();
   $("#reader").hidden = false; document.body.style.overflow = "hidden";
@@ -170,6 +198,7 @@ async function openReader(p, hl){
   try{ wake = await navigator.wakeLock?.request("screen"); }catch(_){ wake = null; }
 }
 function closeReader(){
+  closeVbar();
   $("#reader").hidden = true; document.body.style.overflow = "";
   try{ wake?.release(); }catch(_){} wake = null;
   if(Q) renderIndex();
@@ -617,6 +646,146 @@ async function shareCard(c){
   toast("وێنەکە دابەزێنرا");
 }
 
+/* ================= FASTING + ISLAMIC OCCASIONS ================= */
+// 800 days around today with their Hijri dates; index HD0 is today.
+const HD0 = 400;
+let hCache = {key:"", days:[]};
+function hDays(){
+  const off = cfg().hijriOffset, key = isoKey(iraqNow()) + "|" + off;
+  if(hCache.key !== key){
+    const t = iraqNow();
+    hCache = {key, days:Array.from({length:800}, (_, j) => { const d = new Date(t.getFullYear(), t.getMonth(), t.getDate() + j - HD0, 12); return {d, k:isoKey(d), h:hijriYMD(d, off) || {d:0, m:0, y:0}}; })};
+  }
+  return hCache.days;
+}
+const OCC = [
+  {m:9, d:1, n:"سەرەتای ڕەمەزان"},
+  {m:9, d:21, n:"دە شەوی کۆتایی ڕەمەزان", s:"شەوی قەدر لە شەوە تاکەکانیدایە"},
+  {m:10, d:1, n:"جەژنی ڕەمەزان"},
+  {m:12, d:1, n:"دە ڕۆژەکەی زولحیججە"},
+  {m:12, d:9, n:"ڕۆژی عەرەفە"},
+  {m:12, d:10, n:"جەژنی قوربان"},
+  {m:1, d:1, n:"سەری ساڵی کۆچی"},
+  {m:1, d:10, n:"ڕۆژی عاشورا"}
+];
+const inDays = i => i === 0 ? "ئەمڕۆ" : i === 1 ? "سبەینێ" : `${ku(i)} ڕۆژی ماوە`;
+const gShort = d => `${WD[d.getDay()]}، ${ku(d.getDate())}ی ${GM[d.getMonth()]}`;
+function upcomingOcc(){
+  const days = hDays(), out = [];
+  for(const o of OCC){
+    for(let i = HD0; i < days.length; i++){ const h = days[i].h; if(h.m === o.m && h.d === o.d){ out.push(Object.assign({i:i - HD0, date:days[i].d}, o)); break; } }
+  }
+  return out.sort((a, b) => a.i - b.i);
+}
+// Why a day is a recommended (sunnah) fast, or null. Ramadan, the Eids and the days of tashreeq are excluded.
+function sunnahFast(x){
+  const {m, d} = x.h, wd = x.d.getDay();
+  if(m === 9 || (m === 10 && d === 1) || (m === 12 && d >= 10 && d <= 13)) return null;
+  const why = [];
+  if(m === 12 && d === 9) why.push("ڕۆژی عەرەفە");
+  else if(m === 12 && d <= 8) why.push("ڕۆژانی سەرەتای زولحیججە");
+  if(m === 1 && (d === 9 || d === 10)) why.push(d === 10 ? "ڕۆژی عاشورا" : "تاسوعا (پێش عاشورا)");
+  if(m === 10 && d >= 2) why.push("شەش ڕۆژەکەی شەووال");
+  if(d >= 13 && d <= 15) why.push("ڕۆژانی سپی");
+  if(wd === 1) why.push("دووشەممە"); else if(wd === 4) why.push("پێنجشەممە");
+  return why.length ? why.join(" · ") : null;
+}
+let fastLog = store.get("fast.log", {}), fastQada = store.get("fast.qada", 0);
+function ramadanDays(){
+  const days = hDays(), t = days[HD0].h, y = t.m <= 10 ? t.y : t.y + 1;
+  return days.map((x, j) => Object.assign({i:j - HD0}, x)).filter(x => x.h.y === y && x.h.m === 9);
+}
+function renderFast(){
+  const days = hDays(), today = days[HD0];
+  $("#fsHijri").textContent = hijri(today.d, cfg().hijriOffset);
+  const rd = ramadanDays();
+  let html = `<b>ڕەمەزانی ${ku(rd[0]?.h.y || today.h.y)}</b>`;
+  if(rd.length){
+    const first = rd[0].i, done = rd.filter(x => fastLog[x.k] === 1).length;
+    if(first > 0) html += `<p class="fine">${ku(first)} ڕۆژ ماوە بۆ ڕەمەزان (${gShort(rd[0].d)}).</p>`;
+    else html += `<p class="fine">${ku(done)} لە ${ku(rd.length)} ڕۆژ بە ڕۆژوو بوویت. بۆ نیشانکردن کلیک لە ڕۆژەکە بکە.</p>`;
+    html += `<div class="rgrid">${rd.map(x => `<button data-fk="${x.k}" aria-pressed="${fastLog[x.k] === 1}"${x.i > 0 ? " disabled" : ""} class="${x.i === 0 ? "today" : ""}${fastLog[x.k] === -1 ? " qz" : ""}" aria-label="ڕۆژی ${ku(x.h.d)}"><b>${ku(x.h.d)}</b><small>${ku(x.d.getDate())}/${ku(x.d.getMonth() + 1)}</small></button>`).join("")}</div>`;
+    if(first <= 0 && rd[rd.length - 1].i < 0){
+      const miss = rd.filter(x => !fastLog[x.k]).length;
+      if(miss) html += `<button class="btn wide" data-fs="toqada">${ku(miss)} ڕۆژی نیشاننەکراو بخە سەر قەزا</button>`;
+    }
+  }
+  $("#fsRamadan").innerHTML = html;
+  $("#fsQada").textContent = ku(fastQada);
+  const sun = days.slice(HD0, HD0 + 14).map((x, i) => ({x, i, why:sunnahFast(x)})).filter(r => r.why);
+  $("#fsSunnah").innerHTML = sun.map(r => `<div class="orow${r.i === 0 ? " now" : ""}"><span><b>${gShort(r.x.d)}</b><small>${esc(r.why)}</small></span><em>${inDays(r.i)}</em></div>`).join("")
+    || `<p class="fine">${today.h.m === 9 ? "لە ڕەمەزاندا هەموو ڕۆژێک ڕۆژووی فەرزە." : "هیچ ڕۆژێک نییە."}</p>`;
+  $("#fsOcc").innerHTML = upcomingOcc().map(o => `<div class="orow${o.i <= 7 ? " now" : ""}"><span><b>${o.n}</b><small>${ku(o.d)}ی ${HM[o.m - 1]} · ${gShort(o.date)}${o.s ? " · " + o.s : ""}</small></span><em>${inDays(o.i)}</em></div>`).join("");
+}
+$("#fsRamadan").onclick = e => {
+  const b = e.target.closest("[data-fk]");
+  if(b){ const k = b.dataset.fk; if(fastLog[k] === 1) delete fastLog[k]; else { if(fastLog[k] === -1) fastQada = Math.max(0, fastQada - 1), store.set("fast.qada", fastQada); fastLog[k] = 1; } store.set("fast.log", fastLog); try{ navigator.vibrate?.(10); }catch(_){} renderFast(); return; }
+  if(e.target.closest('[data-fs="toqada"]')){
+    const rd = ramadanDays(), miss = rd.filter(x => !fastLog[x.k]);
+    fastQada += miss.length; miss.forEach(x => fastLog[x.k] = -1);
+    store.set("fast.qada", fastQada); store.set("fast.log", fastLog); toast(`${ku(miss.length)} ڕۆژ خرایە سەر قەزا`); renderFast();
+  }
+};
+$("#v-fast").addEventListener("click", e => {
+  const b = e.target.closest("[data-fq]"); if(!b) return;
+  fastQada = Math.max(0, fastQada + +b.dataset.fq); store.set("fast.qada", fastQada); $("#fsQada").textContent = ku(fastQada);
+});
+
+/* ---------- home banners: Ramadan countdown, Friday, tomorrow's sunnah fast, near occasions ---------- */
+function renderBanners(now, t){
+  const days = hDays(), td = days[HD0], tm = days[HD0 + 1], out = [];
+  if(td.h.m === 9){
+    out.push(`<div class="bn rm"><span><b>ڕۆژی ${ku(td.h.d)}ی ڕەمەزان</b><small id="rmLab"></small></span><b class="num" id="rmCd"></b></div>`);
+  }
+  const fri = now.getDay() === 5 && now < t.maghrib, thuNight = now.getDay() === 4 && now >= t.maghrib;
+  if(fri || thuNight){
+    out.push(`<div class="bn fr"><span><b>${fri ? "ئەمڕۆ هەینییە" : "شەوی هەینییە"}</b><small>سورەتی کەهف بخوێنەرەوە و زۆر صلوات بدە.</small></span><span class="bn-acts"><button class="mini" data-bn="kahf">سورەتی کەهف</button><button class="mini" data-bn="salawat">صلوات</button></span></div>`);
+  }
+  const why = sunnahFast(tm);
+  if(why) out.push(`<a class="bn" href="#fast"><span><b>سبەینێ ڕۆژووی سوننەتە</b><small>${esc(why)}</small></span><em>›</em></a>`);
+  const occ = upcomingOcc().find(o => o.i > 0 && o.i <= 7 && !(o.m === 9 && td.h.m === 9));
+  if(occ) out.push(`<a class="bn" href="#fast"><span><b>${occ.n}</b><small>${ku(occ.d)}ی ${HM[occ.m - 1]}</small></span><em>${inDays(occ.i)}</em></a>`);
+  $("#hBanners").innerHTML = out.join("");
+  const sub = why ? "سبەینێ ڕۆژووی سوننەتە" : (upcomingOcc()[0] ? `${upcomingOcc()[0].n}: ${inDays(upcomingOcc()[0].i)}` : "");
+  $("#tkFast").textContent = td.h.m === 9 ? `ڕۆژی ${ku(td.h.d)}ی ڕەمەزان` : sub;
+}
+function tickRamadan(now, t){
+  const cd = $("#rmCd"); if(!cd) return;
+  let lab, at;
+  if(now < t.fajr){ lab = "پارشێو تا بانگی بەیانی"; at = t.fajr; }
+  else if(now < t.maghrib){ lab = "ماوە بۆ بەربانگ"; at = t.maghrib; }
+  else { const tm = new Date(now); tm.setDate(tm.getDate() + 1); lab = "پارشێو تا بانگی بەیانی"; at = prayerTimes(tm, place(), cfg()).fajr; }
+  let s = Math.max(0, Math.floor((at - now) / 1000)); const h = Math.floor(s / 3600); s -= h * 3600; const mi = Math.floor(s / 60); s -= mi * 60;
+  $("#rmLab").textContent = `${lab} (${t12(at, false)})`;
+  cd.textContent = ku(`${pad(h)}:${pad(mi)}:${pad(s)}`);
+}
+$("#hBanners").onclick = e => {
+  const b = e.target.closest("[data-bn]"); if(!b) return;
+  if(b.dataset.bn === "kahf") loadQuran().then(() => openReader(pageOf(START[17]), START[17]));
+  else { tb.d = 7; tb.t = 100; tb.c = 0; tb.r = 0; store.set("tb", tb); location.hash = "#tasbih"; }
+};
+
+/* ================= AYAH OF THE DAY ================= */
+const AOTD = ["2:152","2:153","2:186","2:201","2:216","2:286","3:8","3:139","3:173","3:200","7:23","7:56","9:51","11:115","12:87","13:28","14:7","15:99","16:97","16:128",
+  "18:46","20:114","21:87","23:118","25:74","29:69","33:41","39:10","39:53","40:60","49:10","49:13","50:16","51:56","55:13","59:10","64:16","65:3","94:5","2:45",
+  "3:92","4:110","6:162","17:80","28:24","71:10","2:155","3:159","13:11","2:222"];
+function renderAotd(){
+  if(!Q) return;
+  const n = iraqNow(), doy = Math.floor((Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()) - Date.UTC(n.getFullYear(), 0, 0)) / 864e5);
+  const [s, a] = AOTD[(doy + n.getFullYear()) % AOTD.length].split(":").map(Number), text = Q[s - 1][3][a - 1];
+  const el = $("#aotd"); el.hidden = false;
+  el.dataset.id = START[s - 1] + a - 1;
+  el.innerHTML = `<div class="kh-h"><b>ئایەتی ڕۆژ</b><span class="sub">سورەتی ${esc(Q[s - 1][0])} · ${ku(a)}</span></div>
+    <div class="ao-ar" lang="ar">${text} ﴿${ku(a)}﴾</div>
+    <div class="foot"><button class="mini" data-ao="read">لە موسحەفدا</button><button class="mini" data-ao="img">ناردن وەک وێنە</button></div>`;
+}
+$("#aotd").onclick = e => {
+  const b = e.target.closest("[data-ao]"); if(!b) return;
+  const id = +$("#aotd").dataset.id, s = surahOf(id), a = id - START[s] + 1;
+  if(b.dataset.ao === "read") openReader(pageOf(id), id);
+  else shareCard({title:`ئایەتی ڕۆژ · سورەتی ${Q[s][0]}`, ar:`${Q[s][3][a - 1]} ﴿${ku(a)}﴾`, quran:true, src:"قورئانی پیرۆز"});
+};
+
 /* ================= SETTINGS + SUGGESTIONS ================= */
 function fillPlaces(){
   const sel = store.get("place", {id:"erbil"});
@@ -659,7 +828,7 @@ $("#sgForm").onsubmit = async e => {
 };
 
 /* ================= ROUTING ================= */
-const VIEWS = ["home", "quran", "qibla", "adhkar", "duas", "tasbih", "log", "zakat"];
+const VIEWS = ["home", "quran", "qibla", "adhkar", "duas", "tasbih", "log", "zakat", "fast"];
 function route(){
   const h = location.hash.slice(1);
   if(h === "read"){ if($("#reader").hidden) openReader(); return; }
@@ -672,6 +841,7 @@ function route(){
   if(v === "tasbih") renderTasbih();
   if(v === "log") renderLog();
   if(v === "zakat") fillZakat();
+  if(v === "fast") renderFast();
   scrollTo(0, 0);
 }
 addEventListener("hashchange", route);
@@ -681,7 +851,7 @@ applyTheme(store.get("theme", "auto"));
 buildRose();
 renderHome(true); renderAdhkar(); renderDuas(); renderQibla(); route();
 setInterval(() => renderHome(false), 1000);
-loadQuran().then(quranSub).catch(() => {});
+loadQuran().then(() => { quranSub(); renderAotd(); }).catch(() => {});
 
 if(firebaseReady){
   const sync = () => refreshContent().then(c => {
