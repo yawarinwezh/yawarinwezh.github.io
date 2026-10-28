@@ -53,6 +53,7 @@
         </div>
       </div>
 
+      <button class="install-card" id="installCard" hidden><img src="icons/icon-192.png" alt="" width="44" height="44"><span><b>یاوەری نوێژ وەک ئەپ دابمەزرێنە</b><small>بەخۆڕایی · بێ ئینتەرنێت کار دەکات · لەسەر شاشەی سەرەکی</small></span><em>دامەزراندن</em></button>
       <div class="banners" id="hBanners"></div>
 
       <ol class="plist" id="plist"></ol>
@@ -374,6 +375,7 @@
       </div>
       <small class="fine">«گەورە و سادە» بۆ بەساڵاچووان: نووسین و دوگمەی گەورەتر و شاشەی سەرەکیی سادەتر.</small>
     </div>
+    <button type="button" class="btn wide" id="sInstall" hidden>دامەزراندنی یاوەری نوێژ وەک ئەپ</button>
     <button type="button" class="btn wide" id="sSuggest">پێشنیار یان ڕاستکردنەوە بنێرە</button>
     <div class="about">
       <p id="sSync"></p>
@@ -382,6 +384,26 @@
       <a href="admin.html" class="admin-link">چوونەژوورەوەی بەڕێوەبەر</a>
     </div>
   </form>
+</dialog>
+
+<!-- Install as app -->
+<dialog class="sheet install" id="install">
+  <div class="sheet-in">
+    <div class="in-hero">
+      <button class="icon-btn in-x" id="inClose" aria-label="داخستن"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <img src="icons/icon-512.png" alt="" width="84" height="84">
+      <b>یاوەری نوێژ لەسەر مۆبایلەکەت</b>
+      <small>وەک ئەپێکی ڕاستەقینە دایبمەزرێنە، بەخۆڕایی</small>
+    </div>
+    <ul class="in-why">
+      <li><span>⚡</span>بە یەک کلیک لە شاشەی سەرەکی دەکرێتەوە</li>
+      <li><span>📴</span>بێ ئینتەرنێت کار دەکات: بانگ، قورئان، قیبلە و ئەزکار</li>
+      <li><span>🖥️</span>بە تەواوی شاشە، بێ شریتی وێبگەڕ</li>
+      <li><span>🔒</span>بێ ڕیکلام، و داتاکانت تەنها لەسەر مۆبایلەکەتن</li>
+    </ul>
+    <div id="inSteps"></div>
+    <button class="btn ghost" id="inLater">دواتر</button>
+  </div>
 </dialog>
 
 <!-- Suggestion sheet -->
