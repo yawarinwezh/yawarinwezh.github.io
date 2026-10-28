@@ -298,6 +298,24 @@ main{padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-ar
 .zk-res .due b{display:block;font-size:30px;font-weight:800;color:var(--accent);line-height:1.3}
 .zk-res .due small{color:var(--muted)}
 
+/* khatm plan + image share + qada nudge */
+.khatm{margin-bottom:12px}
+.khatm .seg{margin-top:4px}
+.khatm .btn.primary{margin-top:10px}
+.kh-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.kh-h .sub{font-size:12.5px;color:var(--muted)}
+.kh-today{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px}
+.kh-today b{font-size:24px;font-weight:800}
+.kh-today b small{font-size:13px;color:var(--muted);font-weight:500}
+.kh-today.ok b{color:var(--ok)}
+.kh-all{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.pbar.thin{height:3px;margin-top:4px}
+.card .acts{display:flex;gap:6px}
+.q .v.sel{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent-soft)}
+.q .v{cursor:pointer}
+.nudge{border:1px dashed var(--frame);background:var(--gold-soft)}
+.nudge .row2{margin-top:4px}
+
 /* tab bar */
 .tabbar{position:fixed;inset:auto 0 0 0;z-index:20;display:flex;justify-content:space-around;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
