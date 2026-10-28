@@ -363,6 +363,9 @@ function renderToolSubs(){
   $("#tkTasbih").textContent = total ? `ئەمڕۆ ${ku(total)}` : "ژمێرەری زیکر";
   const s = streak(), today = (lg[isoKey(iraqNow())] || []).filter(Boolean).length;
   $("#tkLog").textContent = s ? `زنجیرە: ${ku(s)} ڕۆژ` : `ئەمڕۆ ${ku(today)} لە ٥`;
+  const due = hzDue().length; $("#tkHifz").textContent = due ? `${ku(due)} پێداچوونەوە` : "لەبەرکردن";
+  $("#tkKids").textContent = kids.length ? `${ku(kids.length)} منداڵ` : "ئەستێرە ⭐";
+  $("#tkYear").textContent = ku(iraqNow().getFullYear());
 }
 
 /* ================= TASBIH ================= */
@@ -410,7 +413,7 @@ $("#tbBtn").onclick = () => {
   const done = tb.t && tb.c === tb.t;
   if(done){ tb.r++; toast("خولێک تەواو بوو"); }
   try{ navigator.vibrate?.(done ? [40, 60, 40] : 12); }catch(_){}
-  store.set("tb", tb); store.set("tb.log", keepRecent(tbLog, 60));
+  store.set("tb", tb); store.set("tb.log", keepRecent(tbLog, 60)); bumpYear("tasbih");
   renderTbCount(); renderTbLog(); renderToolSubs();
 };
 $("#tbReset").onclick = () => { tb.c = 0; tb.r = 0; store.set("tb", tb); renderTasbih(); };
@@ -529,12 +532,13 @@ let khatm = store.get("khatm", null), khSel = 30, readTimer;
 const KH_DAYS = [7, 15, 30, 60];
 function trackPage(p){
   clearTimeout(readTimer);
-  if(!khatm || khatm.done[p]) return;
   readTimer = setTimeout(() => {
-    if($("#reader").hidden || page !== p || !khatm) return;
+    if($("#reader").hidden || page !== p) return;
+    bumpYear("pages");
+    if(!khatm || khatm.done[p]) return;
     khatm.done[p] = isoKey(iraqNow());
     if(Object.keys(khatm.done).length >= 604 && !khatm.finished){
-      khatm.finished = true; store.set("khatm.n", store.get("khatm.n", 0) + 1);
+      khatm.finished = true; store.set("khatm.n", store.get("khatm.n", 0) + 1); bumpYear("khatm");
       toast("پیرۆزە! خەتمی قورئانت تەواو کرد");
     }
     store.set("khatm", khatm);
@@ -607,7 +611,7 @@ async function shareCard(c){
   const x = cv.getContext("2d"), arF = c.quran ? '"KFGQPC Hafs"' : '"Amiri"', ui = '"IBM Plex Sans Arabic", sans-serif';
   const logo = new Image(); logo.src = "icons/icon-192.png";
   try{ await Promise.all([document.fonts.load(`40px ${arF}`, "بسم"), document.fonts.load(`600 40px ${ui}`, "بسم"),
-    document.fonts.load(`400 40px ${ui}`, "بسم"), document.fonts.load(`400 26px ${ui}`, "abc"), logo.decode()]); }catch(_){}
+    document.fonts.load(`400 40px ${ui}`, "بسم"), document.fonts.load(`700 64px ${ui}`, "٠١٢"), document.fonts.load(`400 26px ${ui}`, "abc"), logo.decode()]); }catch(_){}
   const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#0f5c4d"); g.addColorStop(1, "#082c25");
   x.fillStyle = g; x.fillRect(0, 0, W, H);
   x.strokeStyle = "rgba(201,162,74,.85)"; x.lineWidth = 3; x.strokeRect(44, 44, W - 88, H - 88);
@@ -615,6 +619,17 @@ async function shareCard(c){
   if(logo.complete && logo.naturalWidth){ x.save(); x.beginPath(); x.roundRect?.(W / 2 - 42, 92, 84, 84, 20); x.clip(); x.drawImage(logo, W / 2 - 42, 92, 84, 84); x.restore(); }
   x.direction = "rtl"; x.textAlign = "center"; x.textBaseline = "middle";
   x.fillStyle = "#e9d6a0"; x.font = `600 38px ${ui}`; x.fillText(c.title || "", W / 2, 222);
+  if(c.stats){
+    // two columns of number tiles
+    const n = c.stats.length, rows = Math.ceil(n / 2), tw = 400, th = 170, gx = 40, gy = 30;
+    let y0 = 300 + Math.max(0, (H - 520 - rows * (th + gy)) / 2);
+    c.stats.forEach(([v, l], i) => {
+      const col = i % 2, row = Math.floor(i / 2), cx = W / 2 + (col ? -(tw / 2 + gx / 2) : (tw / 2 + gx / 2)), cy = y0 + row * (th + gy);
+      x.fillStyle = "rgba(255,255,255,.07)"; x.beginPath(); x.roundRect?.(cx - tw / 2, cy, tw, th, 24); x.fill();
+      x.fillStyle = "#fdf8ea"; x.font = `700 64px ${ui}`; x.fillText(v, cx, cy + 68);
+      x.fillStyle = "#e9d6a0"; x.font = `400 28px ${ui}`; x.fillText(l, cx, cy + 128);
+    });
+  } else {
   // shrink the text until it fits between the title and the footer
   const top = 280, bottom = H - 220, maxW = W - 200, aLH = c.quran ? 1.95 : 1.8, kLH = 1.75;
   let as = c.quran ? 64 : 60, ks = 36, aL, kL, h;
@@ -626,12 +641,14 @@ async function shareCard(c){
     as -= 2; ks = Math.max(22, ks - 1);
   }
   let y = top + Math.max(0, (bottom - top - h) / 2);
+  if(!aL.length){ y -= 60; }
   x.fillStyle = "#fdf8ea"; x.font = `${as}px ${arF}`;
   aL.forEach(l => { x.fillText(l, W / 2, y + as * aLH / 2); y += as * aLH; });
   if(kL.length){
     y += 30; x.fillStyle = "rgba(201,162,74,.6)"; x.fillRect(W / 2 - 60, y - 1, 120, 2); y += 30;
     x.fillStyle = "rgba(253,248,234,.82)"; x.font = `400 ${ks}px ${ui}`;
     kL.forEach(l => { x.fillText(l, W / 2, y + ks * kLH / 2); y += ks * kLH; });
+  }
   }
   if(c.src){ x.fillStyle = "#e9d6a0"; x.font = `400 30px ${ui}`; x.fillText(c.src, W / 2, H - 180); }
   x.fillStyle = "#fdf8ea"; x.font = `600 34px ${ui}`; x.fillText("یاوەری نوێژ", W / 2, H - 126);
@@ -786,6 +803,185 @@ $("#aotd").onclick = e => {
   else shareCard({title:`ئایەتی ڕۆژ · سورەتی ${Q[s][0]}`, ar:`${Q[s][3][a - 1]} ﴿${ku(a)}﴾`, quran:true, src:"قورئانی پیرۆز"});
 };
 
+/* ================= HIFZ (memorisation with spaced review) ================= */
+// hifz[surahIndex] = {lvl, next:"YYYY-MM-DD", last, n:reviews}; the review gap grows with each good recall.
+const HZ_GAP = [1, 3, 7, 14, 30, 60, 120];
+let hifz = store.get("hifz", {}), hzCur = null, hzMode = "hide";
+const addDays = (k, n) => { const d = new Date(k + "T12:00"); d.setDate(d.getDate() + n); return isoKey(d); };
+const hzDue = () => { const k = isoKey(iraqNow()); return Object.keys(hifz).filter(i => hifz[i].next <= k).map(Number); };
+function renderHifz(){
+  if(!Q){ loadQuran().then(renderHifz); return; }
+  $("#hzHome").hidden = hzCur != null; $("#hzPractice").hidden = hzCur == null;
+  if(hzCur != null) return renderHzPractice();
+  const k = isoKey(iraqNow()), ids = Object.keys(hifz).map(Number).sort((a, b) => a - b), due = hzDue();
+  $("#hzSub").textContent = ids.length ? `${ku(ids.length)} سورەت` : "";
+  const row = (i, right) => `<div class="orow"><span><b>${esc(Q[i][0])}</b><small>${ku(Q[i][3].length)} ئایەت${hifz[i] ? ` · ${ku(hifz[i].n || 0)} جار پێداچوونەوە` : ""}</small></span>${right}</div>`;
+  $("#hzDue").innerHTML = due.length ? due.map(i => row(i, `<button class="mini" data-hz="${i}">پێداچوونەوە</button>`)).join("")
+    : `<p class="fine">${ids.length ? "ئەمڕۆ هیچ پێداچوونەوەیەکت نییە. دەستت خۆش!" : "هێشتا هیچ سورەتێکت زیاد نەکردووە."}</p>`;
+  $("#hzList").innerHTML = ids.map(i => { const d = dayDiff(k, hifz[i].next);
+    return row(i, `<span class="hz-r"><em>${d <= 0 ? "ئەمڕۆ" : d === 1 ? "سبەینێ" : `${ku(d)} ڕۆژی تر`}</em><button class="mini" data-hz="${i}">ڕاهێنان</button><button class="mini" data-hzdel="${i}" aria-label="سڕینەوە">×</button></span>`); }).join("")
+    || '<p class="fine">کاتێک سورەتێکت تەواو کرد و «باش بوو»ت دابگرت، لێرە دەردەکەوێت.</p>';
+  if(!$("#hzPick").options.length){
+    $("#hzPick").innerHTML = Q.map((s, i) => ({s, i})).reverse().map(({s, i}) => `<option value="${i}">${ku(i + 1)}. ${esc(s[0])}</option>`).join("");
+  }
+}
+function renderHzPractice(){
+  const s = Q[hzCur];
+  $("#hzTitle").textContent = `سورەتی ${s[0]}`;
+  $$("#hzMode button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.hm === hzMode)));
+  $("#hzText").innerHTML = (hzCur !== 0 && hzCur !== 8 ? `<div class="basm">${BASM}</div>` : "") + s[3].map((t, a) =>
+    `<span class="hv">${t.split(" ").map((w, j) => `<span class="hw${hzMode === "show" || (hzMode === "first" && j === 0) ? " on" : ""}">${w}</span>`).join(" ")} <button class="hn" data-a="${a}">${ku(a + 1)}</button></span>`).join(" ");
+}
+$("#v-hifz").addEventListener("click", e => {
+  const go = e.target.closest("[data-hz]"); if(go){ hzCur = +go.dataset.hz; hzMode = "hide"; renderHifz(); scrollTo(0, 0); return; }
+  const del = e.target.closest("[data-hzdel]");
+  if(del){ const i = +del.dataset.hzdel; if(confirm(`سورەتی ${Q[i][0]} لە لیستەکە بسڕدرێتەوە؟`)){ delete hifz[i]; store.set("hifz", hifz); renderHifz(); } return; }
+  const w = e.target.closest(".hw"); if(w){ w.classList.add("on"); return; }
+  const n = e.target.closest(".hn"); if(n){ n.parentElement.querySelectorAll(".hw").forEach(x => x.classList.add("on")); return; }
+  const m = e.target.closest("[data-hm]"); if(m){ hzMode = m.dataset.hm; renderHzPractice(); }
+});
+$("#hzStart").onclick = () => { hzCur = +$("#hzPick").value; hzMode = "hide"; renderHifz(); scrollTo(0, 0); };
+function rateHifz(good){
+  const k = isoKey(iraqNow()), h = hifz[hzCur] || {lvl:-1, n:0};
+  h.lvl = good ? Math.min(HZ_GAP.length - 1, h.lvl + 1) : 0; h.n = (h.n || 0) + 1; h.last = k;
+  h.next = addDays(k, good ? HZ_GAP[h.lvl] : 1); hifz[hzCur] = h; store.set("hifz", hifz);
+  bumpYear("hifz");
+  toast(good ? `دەستت خۆش! پێداچوونەوەی داهاتوو: ${ku(HZ_GAP[h.lvl])} ڕۆژی تر` : "سبەینێ دووبارە پێداچوونەوەی بۆ دەکەیتەوە");
+  hzCur = null; renderHifz(); renderToolSubs();
+}
+$("#hzGood").onclick = () => rateHifz(true);
+$("#hzBad").onclick = () => rateHifz(false);
+$("#hzBack").onclick = () => { hzCur = null; renderHifz(); };
+
+/* ================= KIDS' STAR CHART ================= */
+// kids = [{id, n, log:{"YYYY-MM-DD":[0/1 ×5]}}]; weeks start on Saturday.
+let kids = store.get("kids", []), kidSel = store.get("kids.sel", null);
+const weekStart = () => { const t = iraqNow(), back = (t.getDay() + 1) % 7; return new Date(t.getFullYear(), t.getMonth(), t.getDate() - back, 12); };
+const weekDays = () => { const s = weekStart(); return Array.from({length:7}, (_, i) => new Date(s.getFullYear(), s.getMonth(), s.getDate() + i, 12)); };
+const stars = (kid, keys) => keys.reduce((a, k) => a + (kid.log[k] || []).filter(Boolean).length, 0);
+// Count Saturday-to-Friday weeks in which every one of the 35 prayers got a star.
+function fullWeeks(kid){
+  const keys = Object.keys(kid.log).sort(); if(!keys.length) return 0;
+  let n = 0, d = new Date(keys[0] + "T12:00"); d.setDate(d.getDate() - (d.getDay() + 1) % 7);
+  const end = weekStart();
+  while(d < end){ const ks = Array.from({length:7}, (_, i) => isoKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() + i, 12))); if(stars(kid, ks) === 35) n++; d.setDate(d.getDate() + 7); }
+  return n;
+}
+function renderKids(){
+  if(!kids.find(k => k.id === kidSel)) kidSel = kids[0]?.id ?? null;
+  $("#kdTabs").innerHTML = kids.map(k => `<button aria-pressed="${k.id === kidSel}" data-kid="${k.id}">${esc(k.n)}</button>`).join("");
+  const kid = kids.find(k => k.id === kidSel);
+  if(!kid){ $("#kdBody").innerHTML = '<div class="panel"><p class="fine">ناوی منداڵەکەت لە خوارەوە زیاد بکە. پاشان هەر کاتێک نوێژێکی کرد، ئەستێرەیەکی پێ بدە.</p></div>'; renderToolSubs(); return; }
+  const tk = isoKey(iraqNow()), today = kid.log[tk] || [], wd = weekDays(), wkeys = wd.map(isoKey), ws = stars(kid, wkeys), total = stars(kid, Object.keys(kid.log)), fw = fullWeeks(kid);
+  $("#kdBody").innerHTML = `
+    <div class="streak kd-hero"><span class="big num">${ku(ws)}</span><span><b>ئەستێرەی ئەم هەفتەیە لە ٣٥</b><small>${ws === 35 ? "⭐ نوێژکەری هەفتە! پیرۆزە" : `${ku(35 - ws)} ئەستێرەی ماوە بۆ نیشانەی «نوێژکەری هەفتە»`}</small></span></div>
+    <div class="panel"><b>نوێژەکانی ئەمڕۆی ${esc(kid.n)}</b>
+      <div class="lg-today kd-today">${LP.map((p, i) => `<button class="lg-p" data-ks="${i}" aria-pressed="${!!today[i]}"><span class="dot">${today[i] ? "⭐" : ""}</span>${p.n}</button>`).join("")}</div></div>
+    <div class="panel"><b>ئەم هەفتەیە</b>
+      <div class="kd-week">${wd.map((d, i) => { const a = kid.log[wkeys[i]] || [], c = a.filter(Boolean).length;
+        return `<div class="${wkeys[i] === tk ? "today" : ""}"><small>${WD[d.getDay()].replace("شەممە", "ش").replace("هەینی", "هەینی")}</small><i>${ku(d.getDate())}</i><b>${c ? "⭐".repeat(Math.min(c, 5)) : "·"}</b></div>`; }).join("")}</div>
+      <div class="kd-stats"><span>کۆی ئەستێرەکان: <b class="num">${ku(total)}</b></span><span>هەفتەی تەواو: <b class="num">${ku(fw)}</b></span></div>
+      ${ws === 35 || fw ? '<button class="btn wide" data-kact="cert">بڕوانامەی «نوێژکەری هەفتە» وەک وێنە</button>' : ""}
+      <button class="btn ghost" data-kact="del">سڕینەوەی ${esc(kid.n)}</button></div>`;
+  renderToolSubs();
+}
+$("#kdTabs").onclick = e => { const b = e.target.closest("[data-kid]"); if(b){ kidSel = b.dataset.kid; store.set("kids.sel", kidSel); renderKids(); } };
+$("#kdBody").onclick = e => {
+  const kid = kids.find(k => k.id === kidSel); if(!kid) return;
+  const s = e.target.closest("[data-ks]");
+  if(s){ const tk = isoKey(iraqNow()), a = kid.log[tk] || [0, 0, 0, 0, 0], i = +s.dataset.ks; a[i] = a[i] ? 0 : 1; kid.log[tk] = a;
+    keepRecent(kid.log, 400); store.set("kids", kids); try{ navigator.vibrate?.(a[i] ? [20, 40, 20] : 10); }catch(_){}
+    renderKids(); if(a[i] && stars(kid, weekDays().map(isoKey)) === 35) toast(`⭐ ${kid.n} بوو بە نوێژکەری هەفتە!`); return; }
+  const act = e.target.closest("[data-kact]")?.dataset.kact;
+  if(act === "cert") shareCard({title:"بڕوانامەی ڕێزلێنان", ar:`⭐ ${kid.n} ⭐`, ku:"نوێژکەری هەفتە\nهەر پێنج نوێژەکەی بە درێژایی هەفتەکە کرد. خوا لێی ڕازی بێت.", src:"خشتەی ئەستێرەی منداڵان"});
+  if(act === "del" && confirm(`${kid.n} و هەموو ئەستێرەکانی بسڕدرێنەوە؟`)){ kids = kids.filter(k => k !== kid); store.set("kids", kids); renderKids(); }
+};
+$("#kdAdd").onclick = () => {
+  const n = $("#kdName").value.trim(); if(!n){ toast("ناوی منداڵەکە بنووسە"); return; }
+  const id = "k" + Date.now().toString(36); kids.push({id, n, log:{}}); kidSel = id;
+  store.set("kids", kids); store.set("kids.sel", id); $("#kdName").value = ""; renderKids();
+};
+
+/* ================= NOTES: my duas, people to pray for, charity ================= */
+let notes = Object.assign({mine:[], ask:[], give:[], goal:0}, store.get("notes", {})), ntTab = "mine";
+const saveNotes = () => store.set("notes", notes);
+const kdate = k => { const [y, m, d] = k.split("-"); return ku(`${+d}/${+m}/${y}`); };
+const nid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+function renderNotes(){
+  $$("#ntTabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.nt === ntTab)));
+  let h = "";
+  if(ntTab === "mine"){
+    h = `<div class="panel"><b>دوعایەکی نوێ</b><label class="field" for="ntText">دەقی دوعا<textarea id="ntText" rows="3" maxlength="1000" placeholder="ئەو دوعایەی دەتەوێت هەمیشە بیکەیت…"></textarea></label><button class="btn primary wide" data-na="addMine">پاشەکەوتکردن</button></div>
+      <div class="cards">${notes.mine.map(x => `<article class="card"><div class="ku nt">${esc(x.t)}</div><div class="foot"><span class="src">${kdate(x.d)}</span><span class="acts"><button class="mini" data-na="imgMine" data-id="${x.id}">وەک وێنە</button><button class="mini" data-na="del" data-l="mine" data-id="${x.id}">سڕینەوە</button></span></div></article>`).join("") || '<div class="empty">هێشتا هیچ دوعایەکت نەنووسیوە.</div>'}</div>`;
+  } else if(ntTab === "ask"){
+    h = `<div class="panel"><b>کەسێک داوای دوعای لێ کردوویت؟</b><div class="row2"><label class="field" for="ntName">ناو<input id="ntName" maxlength="60"></label><label class="field" for="ntWhy">بۆ چی (ئارەزوومەندانە)<input id="ntWhy" maxlength="120" placeholder="بۆ نموونە چاکبوونەوە"></label></div><button class="btn primary wide" data-na="addAsk">زیادکردن</button></div>
+      <div class="panel"><div class="olist">${notes.ask.map(x => `<div class="orow"><span><b>${esc(x.n)}</b><small>${esc(x.w || "")}${x.c ? ` · ${ku(x.c)} جار دوعات بۆ کردووە` : ""}${x.last ? ` · دوایین جار ${kdate(x.last)}` : ""}</small></span><span class="hz-r"><button class="mini${x.last === isoKey(iraqNow()) ? " done" : ""}" data-na="prayed" data-id="${x.id}">${x.last === isoKey(iraqNow()) ? "✓ ئەمڕۆ" : "دوعام بۆ کرد"}</button><button class="mini" data-na="del" data-l="ask" data-id="${x.id}" aria-label="سڕینەوە">×</button></span></div>`).join("") || '<p class="fine">ئەو کەسانەی دەڵێن «دوعام بۆ بکە» لێرە بنووسە، بۆ ئەوەی لەبیرت نەچن.</p>'}</div></div>`;
+  } else {
+    const now = iraqNow(), mk = isoKey(now).slice(0, 7), month = notes.give.filter(x => x.d.startsWith(mk)), sum = month.reduce((a, x) => a + x.a, 0), cur = (zk.cur || "دینار");
+    const pct = notes.goal ? Math.min(1, sum / notes.goal) : 0;
+    h = `<div class="panel"><b>خێری ئەم مانگە</b>
+        <div class="kh-today${notes.goal && sum >= notes.goal ? " ok" : ""}"><span>${GM[now.getMonth()]}</span><b class="num">${fmt(sum)} <small>${notes.goal ? `لە ${fmt(notes.goal)} ${cur}` : cur}</small></b></div>
+        ${notes.goal ? `<div class="pbar"><i style="width:${(pct * 100).toFixed(1)}%"></i></div>` : ""}
+        <div class="qada-add"><label class="field" for="ntGoal">ئامانجی مانگانە (${cur})<input id="ntGoal" inputmode="decimal" value="${notes.goal ? notes.goal : ""}"></label><button class="btn" data-na="goal">دانان</button></div></div>
+      <div class="panel"><b>تۆمارکردنی خێرێک</b><div class="row2"><label class="field" for="ntAmt">بڕ<input id="ntAmt" inputmode="decimal"></label><label class="field" for="ntFor">بۆ چی (ئارەزوومەندانە)<input id="ntFor" maxlength="80" placeholder="هەژار، مزگەوت…"></label></div><button class="btn primary wide" data-na="addGive">تۆمارکردن</button></div>
+      <div class="panel"><div class="olist">${month.slice().reverse().map(x => `<div class="orow"><span><b class="num">${fmt(x.a)} ${cur}</b><small>${kdate(x.d)}${x.f ? " · " + esc(x.f) : ""}</small></span><button class="mini" data-na="del" data-l="give" data-id="${x.id}" aria-label="سڕینەوە">×</button></div>`).join("") || '<p class="fine">ئەم مانگە هێشتا هیچ خێرێکت تۆمار نەکردووە.</p>'}</div></div>`;
+  }
+  $("#ntBody").innerHTML = h;
+}
+$("#ntTabs").onclick = e => { const b = e.target.closest("[data-nt]"); if(b){ ntTab = b.dataset.nt; renderNotes(); } };
+$("#ntBody").onclick = e => {
+  const b = e.target.closest("[data-na]"); if(!b) return;
+  const a = b.dataset.na, today = isoKey(iraqNow());
+  if(a === "addMine"){ const t = $("#ntText").value.trim(); if(!t) return toast("دەقی دوعاکە بنووسە"); notes.mine.unshift({id:nid(), t, d:today}); }
+  else if(a === "addAsk"){ const n = $("#ntName").value.trim(); if(!n) return toast("ناوەکە بنووسە"); notes.ask.unshift({id:nid(), n, w:$("#ntWhy").value.trim(), c:0}); }
+  else if(a === "prayed"){ const x = notes.ask.find(x => x.id === b.dataset.id); if(x && x.last !== today){ x.c = (x.c || 0) + 1; x.last = today; toast("خوا قبووڵی بکات"); } }
+  else if(a === "addGive"){ const v = parseNum($("#ntAmt").value); if(!(v > 0)) return toast("بڕەکە بنووسە"); notes.give.push({id:nid(), a:v, f:$("#ntFor").value.trim(), d:today}); toast("خوا لێت وەربگرێت"); }
+  else if(a === "goal"){ notes.goal = Math.max(0, parseNum($("#ntGoal").value)); }
+  else if(a === "imgMine"){ const x = notes.mine.find(x => x.id === b.dataset.id); if(x) shareCard({title:"دوعا", ar:"", ku:x.t, src:""}); return; }
+  else if(a === "del"){ if(!confirm("بسڕدرێتەوە؟")) return; notes[b.dataset.l] = notes[b.dataset.l].filter(x => x.id !== b.dataset.id); }
+  saveNotes(); renderNotes();
+};
+
+/* ================= YEAR IN REVIEW ================= */
+// Running yearly counters for things whose daily logs are not kept for a whole year.
+function bumpYear(k, n = 1){ const y = String(iraqNow().getFullYear()), o = store.get("yr." + k, {}); o[y] = (o[y] || 0) + n; store.set("yr." + k, o); }
+let yrSel = iraqNow().getFullYear();
+function yearStats(y){
+  const p = String(y) + "-", inY = o => Object.keys(o).filter(k => k.startsWith(p));
+  const pk = inY(lg), prayers = pk.reduce((a, k) => a + lg[k].filter(Boolean).length, 0), fullDays = pk.filter(full).length;
+  let best = 0, run = 0;
+  for(let d = new Date(y, 0, 1, 12); d.getFullYear() === y; d.setDate(d.getDate() + 1)){ if(full(isoKey(d))){ run++; best = Math.max(best, run); } else run = 0; }
+  const yv = k => store.get("yr." + k, {})[y] || 0;
+  return {prayers, fullDays, best, tasbih:yv("tasbih"), pages:yv("pages"), khatm:yv("khatm"), hifz:yv("hifz"),
+    fasts:inY(fastLog).filter(k => fastLog[k] === 1).length, give:notes.give.filter(x => x.d.startsWith(p)).length,
+    kidStars:kids.reduce((a, kid) => a + stars(kid, inY(kid.log)), 0)};
+}
+const YR_ITEMS = [["prayers", "نوێژی تۆمارکراو"], ["fullDays", "ڕۆژی هەر پێنج نوێژ"], ["best", "درێژترین زنجیرە (ڕۆژ)"], ["pages", "لاپەڕەی قورئان خوێندراو"],
+  ["khatm", "خەتمی قورئان"], ["tasbih", "زیکر لە تەسبیحدا"], ["fasts", "ڕۆژی ڕۆژووی ڕەمەزان"], ["hifz", "پێداچوونەوەی حیفز"], ["give", "جار خێر"], ["kidStars", "ئەستێرەی منداڵان"]];
+function renderYear(){
+  const y = yrSel, s = yearStats(y), years = [...new Set([iraqNow().getFullYear(), ...Object.keys(lg).map(k => +k.slice(0, 4))])].sort((a, b) => b - a);
+  $("#yrYears").innerHTML = years.map(v => `<button aria-pressed="${v === y}" data-y="${v}">${ku(v)}</button>`).join("");
+  $("#yrSub").textContent = `ساڵی ${ku(y)}`;
+  $("#yrHero").innerHTML = `<small>ساڵی ${ku(y)} لەگەڵ یاوەری نوێژ</small><b class="num">${ku(s.prayers.toLocaleString("en")).replace(/,/g, "٬")}</b><span>نوێژ تۆمارکرا</span>`;
+  $("#yrGrid").innerHTML = YR_ITEMS.slice(1).filter(([k]) => s[k]).map(([k, n]) => `<div class="fact"><b class="num">${fmt(s[k])}</b><span>${n}</span></div>`).join("")
+    || '<p class="fine">هێشتا زانیاری ئەم ساڵە کەمە. نوێژەکانت تۆمار بکە، قورئان بخوێنەوە و تەسبیح بکە، و ئەم پەڕەیە پڕ دەبێتەوە.</p>';
+}
+$("#yrYears").onclick = e => { const b = e.target.closest("[data-y]"); if(b){ yrSel = +b.dataset.y; renderYear(); } };
+$("#yrShare").onclick = () => { const s = yearStats(yrSel);
+  shareCard({title:`ساڵی ${ku(yrSel)} لەگەڵ یاوەری نوێژ`, stats:YR_ITEMS.filter(([k]) => s[k]).slice(0, 8).map(([k, n]) => [fmt(s[k]), n]), src:"ساڵی من"}); };
+
+// First run of the yearly counters: start them from what is already on the phone.
+if(store.get("yr.tasbih", null) == null){ const y = String(iraqNow().getFullYear());
+  bumpYear("tasbih", Object.keys(tbLog).filter(k => k.startsWith(y)).reduce((a, k) => a + Object.values(tbLog[k]).reduce((b, c) => b + c, 0), 0)); }
+if(store.get("yr.khatm", null) == null) bumpYear("khatm", store.get("khatm.n", 0));
+
+/* ================= BIG & SIMPLE MODE ================= */
+function applyBig(v){
+  if(v) document.documentElement.dataset.big = "1"; else delete document.documentElement.dataset.big;
+  $$("#sBig button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.big === (v ? 1 : 0))));
+}
+$$("#sBig button").forEach(b => b.onclick = () => { const v = +b.dataset.big; store.set("big", v); applyBig(v); });
+
 /* ================= SETTINGS + SUGGESTIONS ================= */
 function fillPlaces(){
   const sel = store.get("place", {id:"erbil"});
@@ -796,7 +992,7 @@ function fillPlaces(){
   $("#sSync").textContent = !firebaseReady ? "ناوەڕۆکی بنەڕەتی بەکاردێت." : at ? `دوایین نوێکردنەوەی دوعا و کاتەکان: ${ku(new Date(at).toLocaleDateString("en-GB"))}` : "ناوەڕۆک هێشتا لە سێرڤەر وەرنەگیراوە.";
 }
 function placeChanged(){ renderHome(true); renderQibla(); fillPlaces(); }
-$("#openSettings").onclick = $("#placeChip").onclick = () => { fillPlaces(); applyTheme(store.get("theme", "auto")); $("#settings").showModal(); };
+$("#openSettings").onclick = $("#placeChip").onclick = () => { fillPlaces(); applyTheme(store.get("theme", "auto")); applyBig(store.get("big", 0)); $("#settings").showModal(); };
 $("#sPlace").onchange = e => { if(e.target.value !== "gps") store.set("place", {id:e.target.value}); placeChanged(); };
 $("#sGps").onclick = () => {
   if(!navigator.geolocation){ $("#sGpsNote").textContent = "ئەم مۆبایلە GPS-ی نییە."; return; }
@@ -828,7 +1024,7 @@ $("#sgForm").onsubmit = async e => {
 };
 
 /* ================= ROUTING ================= */
-const VIEWS = ["home", "quran", "qibla", "adhkar", "duas", "tasbih", "log", "zakat", "fast"];
+const VIEWS = ["home", "quran", "qibla", "adhkar", "duas", "tasbih", "log", "zakat", "fast", "hifz", "kids", "notes", "year"];
 function route(){
   const h = location.hash.slice(1);
   if(h === "read"){ if($("#reader").hidden) openReader(); return; }
@@ -842,6 +1038,10 @@ function route(){
   if(v === "log") renderLog();
   if(v === "zakat") fillZakat();
   if(v === "fast") renderFast();
+  if(v === "hifz"){ hzCur = null; renderHifz(); }
+  if(v === "kids") renderKids();
+  if(v === "notes") renderNotes();
+  if(v === "year") renderYear();
   scrollTo(0, 0);
 }
 addEventListener("hashchange", route);

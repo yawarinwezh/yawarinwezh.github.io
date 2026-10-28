@@ -15,7 +15,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preload" href="fonts/plex-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/app.css">
-<script>try{var t=localStorage.getItem("yn.theme");t=t&&JSON.parse(t);if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
+<script>try{var t=localStorage.getItem("yn.theme");t=t&&JSON.parse(t);if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;if(localStorage.getItem("yn.big")==="1")document.documentElement.dataset.big="1";}catch(e){}</script>
 </head>
 <body>
 <div class="app">
@@ -64,9 +64,13 @@
 
       <div class="tools">
         <a class="tcard" href="#tasbih"><span class="qk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"/><circle cx="17.3" cy="6.7" r="1.6"/><circle cx="19.5" cy="12" r="1.6"/><circle cx="17.3" cy="17.3" r="1.6"/><circle cx="6.7" cy="6.7" r="1.6"/><circle cx="4.5" cy="12" r="1.6"/><circle cx="6.7" cy="17.3" r="1.6"/><path d="M12 19.5v3"/></svg></span><b>تەسبیح</b><small id="tkTasbih"></small></a>
-        <a class="tcard" href="#log"><span class="qk-ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M9 15l2 2 4-4"/></svg></span><b>تۆماری نوێژ</b><small id="tkLog"></small></a>
-        <a class="tcard" href="#zakat"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M9.5 16.4c.9 1.2 3.2 2.1 6 2.1 3 0 5.5-1.1 5.5-2.5v-4c0-1.4-2.5-2.5-5.5-2.5"/></svg></span><b>زەکات‌ژمێر</b><small>زەکاتی ساڵانە</small></a>
-        <a class="tcard" href="#fast"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5Z"/><path d="m17 3 .6 1.4L19 5l-1.4.6L17 7l-.6-1.4L15 5l1.4-.6Z"/></svg></span><b>ڕۆژوو و بۆنەکان</b><small id="tkFast"></small></a>
+        <a class="tcard" href="#log"><span class="qk-ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M9 15l2 2 4-4"/></svg></span><b>نوێژەکانم</b><small id="tkLog"></small></a>
+        <a class="tcard" href="#zakat"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M9.5 16.4c.9 1.2 3.2 2.1 6 2.1 3 0 5.5-1.1 5.5-2.5v-4c0-1.4-2.5-2.5-5.5-2.5"/></svg></span><b>زەکات</b><small>ژمێرەر</small></a>
+        <a class="tcard" href="#fast"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5Z"/><path d="m17 3 .6 1.4L19 5l-1.4.6L17 7l-.6-1.4L15 5l1.4-.6Z"/></svg></span><b>ڕۆژوو</b><small id="tkFast"></small></a>
+        <a class="tcard" href="#hifz"><span class="qk-ic"><svg viewBox="0 0 24 24"><path d="M12 6.5C10 4.8 7 4 3 4v14c4 0 7 .8 9 2.5 2-1.7 5-2.5 9-2.5V4c-4 0-7 .8-9 2.5Z"/><path d="m9 11 2 2 4-4"/></svg></span><b>حیفز</b><small id="tkHifz"></small></a>
+        <a class="tcard" href="#kids"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6 .9-4.4 4.2 1 6L12 16.8 6.7 19.6l1-6-4.4-4.2 6-.9Z"/></svg></span><b>منداڵان</b><small id="tkKids"></small></a>
+        <a class="tcard" href="#notes"><span class="qk-ic"><svg viewBox="0 0 24 24"><path d="M5 3.5h11l3 3v14H5Z"/><path d="M8.5 9h7M8.5 12.5h7M8.5 16h4"/></svg></span><b>دەفتەر</b><small>دوعا و خێر</small></a>
+        <a class="tcard" href="#year"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><b>ساڵی من</b><small id="tkYear"></small></a>
       </div>
 
       <div class="panel aotd" id="aotd" hidden></div>
@@ -210,6 +214,65 @@
       <p class="fine">بەروارە کۆچییەکان بە پێی ساڵنامەی ئوم ئەلقوڕا حیساب دەکرێن. بە پێی بینینی مانگ لەوانەیە یەک ڕۆژ جیاوازی هەبێت. بەڕێوەبەر دەتوانێت لە ڕێکخستنەکاندا ڕاستی بکاتەوە.</p>
     </section>
 
+    <!-- HIFZ -->
+    <section class="view" id="v-hifz" data-view="hifz" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>لەبەرکردنی قورئان</h1><span class="sub" id="hzSub"></span></div>
+      <div id="hzHome">
+        <div class="panel">
+          <b>پێداچوونەوەی ئەمڕۆ</b>
+          <div class="olist" id="hzDue"></div>
+        </div>
+        <div class="panel">
+          <b>سورەتێک زیاد بکە</b>
+          <p class="fine">سورەتێک هەڵبژێرە بۆ ڕاهێنان. ئایەتەکان دەشاردرێنەوە و تۆ لە یادی خۆتەوە دەیانخوێنیت.</p>
+          <div class="qada-add"><label class="field" for="hzPick">سورەت<select id="hzPick"></select></label><button class="btn primary" type="button" id="hzStart">دەستپێکردن</button></div>
+        </div>
+        <div class="panel">
+          <b>سورەتە لەبەرکراوەکانم</b>
+          <div class="olist" id="hzList"></div>
+        </div>
+        <div class="tip"><b>چۆن کار دەکات؟</b><ul>
+          <li>هەر کاتێک سورەتێکت بە باشی خوێندەوە، «باش بوو» دابگرە. ماوەی پێداچوونەوەی داهاتوو درێژتر دەبێت: ١، ٣، ٧، ١٤، ٣٠، ٦٠ و ١٢٠ ڕۆژ.</li>
+          <li>ئەگەر هەڵەت هەبوو، «هەڵەم هەبوو» دابگرە و سبەینێ دووبارە پێداچوونەوەی بۆ دەکەیتەوە.</li>
+        </ul></div>
+      </div>
+      <div id="hzPractice" hidden>
+        <div class="hz-bar"><b id="hzTitle"></b><span class="seg" role="group" aria-label="شێوازی شاردنەوە" id="hzMode"><button data-hm="hide">شاراوە</button><button data-hm="first">یەکەم وشە</button><button data-hm="show">پیشاندان</button></span></div>
+        <p class="fine">کلیک لە وشەیەک بکە بۆ دەرکەوتنی. کلیک لە ژمارەی ئایەت بکە بۆ دەرکەوتنی هەموو ئایەتەکە.</p>
+        <div class="page hz-page"><div class="q" id="hzText"></div></div>
+        <div class="row2 hz-rate"><button class="btn primary" id="hzGood">باش بوو ✓</button><button class="btn" id="hzBad">هەڵەم هەبوو</button></div>
+        <button class="btn ghost" id="hzBack">گەڕانەوە بۆ لیست</button>
+      </div>
+    </section>
+
+    <!-- KIDS -->
+    <section class="view" id="v-kids" data-view="kids" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>ئەستێرەی منداڵان</h1><span class="sub">بۆ هەر نوێژێک ئەستێرەیەک ⭐</span></div>
+      <div class="chips" id="kdTabs"></div>
+      <div id="kdBody"></div>
+      <div class="panel">
+        <b>منداڵێک زیاد بکە</b>
+        <div class="qada-add"><label class="field" for="kdName">ناوی منداڵ<input id="kdName" maxlength="30" placeholder="بۆ نموونە ئارام"></label><button class="btn" type="button" id="kdAdd">زیادکردن</button></div>
+      </div>
+    </section>
+
+    <!-- NOTES: duas + sadaqa -->
+    <section class="view" id="v-notes" data-view="notes" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>دەفتەری دوعا و خێر</h1><span class="sub">تەنها لەسەر مۆبایلەکەت هەڵدەگیرێت</span></div>
+      <div class="seg" role="group" aria-label="بەشەکان" id="ntTabs"><button data-nt="mine">دوعاکانم</button><button data-nt="ask">دوعام بۆ بکە</button><button data-nt="give">خێر</button></div>
+      <div id="ntBody"></div>
+    </section>
+
+    <!-- YEAR IN REVIEW -->
+    <section class="view" id="v-year" data-view="year" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>ساڵی من</h1><span class="sub" id="yrSub"></span></div>
+      <div class="chips" id="yrYears"></div>
+      <div class="yr-hero" id="yrHero"></div>
+      <div class="yr-grid" id="yrGrid"></div>
+      <button class="btn primary wide" id="yrShare">ناردن وەک وێنە</button>
+      <p class="fine">ژمارەکان لەو زانیارییانە وەرگیراون کە لەسەر ئەم مۆبایلە تۆمارت کردوون.</p>
+    </section>
+
     <!-- ZAKAT -->
     <section class="view" id="v-zakat" data-view="zakat" hidden>
       <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>زەکات‌ژمێر</h1><span class="sub">٢٫٥٪ی ماڵی گەیشتوو بە نیساب</span></div>
@@ -303,6 +366,13 @@
         <button type="button" data-theme-set="light">ڕووناک</button>
         <button type="button" data-theme-set="dark">تاریک</button>
       </div>
+    </div>
+    <div class="field">قەبارەی ئەپ
+      <div class="seg" role="group" aria-label="قەبارەی ئەپ" id="sBig">
+        <button type="button" data-big="0">ئاسایی</button>
+        <button type="button" data-big="1">گەورە و سادە</button>
+      </div>
+      <small class="fine">«گەورە و سادە» بۆ بەساڵاچووان: نووسین و دوگمەی گەورەتر و شاشەی سەرەکیی سادەتر.</small>
     </div>
     <button type="button" class="btn wide" id="sSuggest">پێشنیار یان ڕاستکردنەوە بنێرە</button>
     <div class="about">
