@@ -4,6 +4,7 @@
   "description": "کاتەکانی بانگ، قیبلەنما، قورئانی پیرۆز، ئەزکار و دوعا بە کوردی",
   "lang": "ckb",
   "dir": "rtl",
+  "id": "./",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

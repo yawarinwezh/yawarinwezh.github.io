@@ -982,6 +982,61 @@ function applyBig(v){
 }
 $$("#sBig button").forEach(b => b.onclick = () => { const v = +b.dataset.big; store.set("big", v); applyBig(v); });
 
+/* ================= INSTALL AS APP ================= */
+// Shown in the browser only: Android gets the real install button, iPhone gets illustrated steps,
+// and links opened inside Instagram/Facebook/TikTok are told to open in the browser first.
+const UA = navigator.userAgent;
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+const isInApp = /FBAN|FBAV|FB_IAB|Instagram|Snapchat|BytedanceWebview|TikTok|musical_ly|Line\//i.test(UA);
+const isMobile = isIOS || /Android|Mobi/i.test(UA);
+let installEvt = null;
+const IC = {
+  share:'<svg viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>',
+  add:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>',
+  dots:'<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>',
+  more:'<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>',
+  ok:'<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+  globe:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg>'
+};
+const step = (n, icon, html) => `<li><span class="in-n">${ku(n)}</span><span class="in-t">${html}</span><span class="in-ic">${icon}</span></li>`;
+function installSteps(){
+  if(installEvt) return `<button class="btn primary wide in-go" id="inGo">${IC.add} دامەزراندن</button>`;
+  if(isInApp) return `<p class="in-note">ئەم لینکە لەناو ئەپێکی تردا کراوەتەوە (وەک ئینستاگرام یان فەیسبووک). سەرەتا لە وێبگەڕدا بیکەرەوە:</p>
+    <ol class="in-steps">${step(1, IC.more, "کلیک لە <b>⋯</b> لە سەرەوەی شاشەکە بکە")}${step(2, IC.globe, `<b>Open in browser</b> یان <b>${isIOS ? "Open in Safari" : "Open in Chrome"}</b> هەڵبژێرە`)}${step(3, IC.add, "لەوێ ئەم پەڕەیە دووبارە دەردەکەوێت و دەتوانیت دایبمەزرێنیت")}</ol>
+    <button class="btn wide" id="inCopy">کۆپیکردنی لینک</button>`;
+  if(isIOS) return `<ol class="in-steps">${step(1, IC.share, `لە ${/CriOS|FxiOS|EdgiOS/.test(UA) ? "سەرەوە" : "خوارەوەی Safari"} کلیک لە دوگمەی <b>هاوبەشکردن</b> بکە`)}${step(2, IC.add, "بچۆ خوارەوە و <b>Add to Home Screen</b> هەڵبژێرە")}${step(3, IC.ok, "لە سەرەوە <b>Add</b> دابگرە. تەواو!")}</ol>
+    <p class="in-note">پاشان ئایکۆنی یاوەری نوێژ لەسەر شاشەی سەرەکی دەردەکەوێت.</p>`;
+  return `<ol class="in-steps">${step(1, IC.dots, "لە سەرەوەی وێبگەڕەکە کلیک لە <b>⋮</b> بکە")}${step(2, IC.add, "<b>Install app</b> یان <b>Add to Home screen</b> هەڵبژێرە")}${step(3, IC.ok, "<b>Install</b> دابگرە. تەواو!")}</ol>`;
+}
+function openInstall(){
+  if(isStandalone()) return;
+  $("#settings").open && $("#settings").close();
+  $("#inSteps").innerHTML = installSteps();
+  $("#install").showModal();
+}
+function updateInstallUI(){
+  const show = !isStandalone() && !store.get("installed", 0) && (isMobile || !!installEvt);
+  $("#installCard").hidden = !show; $("#sInstall").hidden = !show;
+}
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; updateInstallUI(); if($("#install").open) $("#inSteps").innerHTML = installSteps(); });
+addEventListener("appinstalled", () => { installEvt = null; store.set("installed", 1); updateInstallUI(); $("#install").open && $("#install").close(); toast("یاوەری نوێژ دامەزرا. لە شاشەی سەرەکی بیکەرەوە."); });
+$("#installCard").onclick = $("#sInstall").onclick = openInstall;
+$("#inClose").onclick = $("#inLater").onclick = () => { store.set("inst.later", Date.now()); $("#install").close(); };
+$("#install").addEventListener("click", async e => {
+  if(e.target.closest("#inGo") && installEvt){
+    installEvt.prompt();
+    try{ const r = await installEvt.userChoice; if(r.outcome === "accepted"){ store.set("installed", 1); $("#install").close(); } }catch(_){}
+    installEvt = null; updateInstallUI();
+  }
+  if(e.target.closest("#inCopy")){ try{ await navigator.clipboard.writeText(location.origin + location.pathname); toast("لینکەکە کۆپی کرا. لە Chrome یان Safari دایبنێ."); }catch(_){ toast("کۆپی نەکرا"); } }
+});
+updateInstallUI();
+// First visits on a phone: offer it once, then again a week after "later".
+if(!isStandalone() && isMobile && !store.get("installed", 0) && Date.now() - store.get("inst.later", 0) > 7 * 864e5){
+  setTimeout(() => { if(!document.querySelector("dialog[open]") && $("#reader").hidden) openInstall(); }, 4000);
+}
+
 /* ================= SETTINGS + SUGGESTIONS ================= */
 function fillPlaces(){
   const sel = store.get("place", {id:"erbil"});
