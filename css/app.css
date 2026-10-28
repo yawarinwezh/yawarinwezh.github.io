@@ -231,6 +231,73 @@ main{padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-ar
 .suggest-cta small{color:var(--muted)}
 .suggest-cta svg{width:20px;height:20px;color:var(--gold)}
 
+/* home tools row */
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.tcard{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;background:var(--surface);border-radius:var(--r);padding:12px 6px;box-shadow:var(--shadow);min-width:0}
+.tcard b{font-size:13.5px;line-height:1.3}
+.tcard small{color:var(--muted);font-size:11.5px;line-height:1.3;min-height:1.3em}
+.back{display:inline-grid;place-items:center;width:30px;height:30px;margin-inline-end:6px;vertical-align:-5px;border-radius:9px;color:var(--muted)}
+.back svg{width:20px;height:20px}
+.panel{margin-top:12px;background:var(--surface);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow)}
+.panel>b{display:block;font-size:14.5px}
+.panel .fine{margin:2px 0 8px}
+
+/* tasbih */
+#v-tasbih .seg{margin-top:10px}
+.tb-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:16px}
+.tb-ar{font-family:var(--f-ar);font-size:26px;line-height:1.8;text-align:center;min-height:1.8em}
+.tb-btn{position:relative;width:min(70vw,250px);aspect-ratio:1;border:0;border-radius:50%;background:radial-gradient(circle at 50% 35%,var(--hero1),var(--hero2));color:var(--hero-ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 18px 34px -18px var(--hero1);transition:transform .07s;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.tb-btn:active{transform:scale(.96)}
+.tb-ring{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px)}
+.tb-ring circle{fill:none;stroke-width:5}
+.tb-ring .bg{stroke:rgb(255 255 255/.14)}
+.tb-ring .fg{stroke:var(--star);stroke-linecap:round;transition:stroke-dashoffset .15s}
+.tb-n{font-size:56px;font-weight:800;line-height:1.1}
+.tb-of{font-size:14px;opacity:.8}
+.tb-meta{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13.5px}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.bars .row{display:grid;grid-template-columns:86px 1fr 52px;align-items:center;gap:8px;font-size:12.5px}
+.bars .row span:first-child{color:var(--muted)}
+.bars .row i{display:block;height:9px;border-radius:9px;background:linear-gradient(90deg,var(--gold),var(--accent));min-width:3px}
+.bars .row b{text-align:left;font-weight:700}
+
+/* prayer log */
+.streak{display:flex;align-items:center;gap:14px;border-radius:var(--r);padding:14px 16px;color:var(--hero-ink);background:linear-gradient(135deg,var(--hero1),var(--hero2))}
+.streak .big{font-size:38px;font-weight:800;line-height:1}
+.streak small{display:block;opacity:.85;font-size:12.5px}
+.lg-today{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.lg-p{display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 2px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.lg-p .dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:transparent}
+.lg-p[aria-pressed="true"]{border-color:color-mix(in srgb,var(--ok) 55%,transparent);color:var(--ink);background:color-mix(in srgb,var(--ok) 9%,var(--surface))}
+.lg-p[aria-pressed="true"] .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.lg-p .dot svg{width:16px;height:16px;stroke-width:3}
+.lg-week{min-width:0!important;font-size:12px!important}
+.lg-week th,.lg-week td{padding:6px 2px!important}
+.lg-week td:first-child,.lg-week th:first-child{padding-inline-start:8px!important}
+.lg-week td button{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);background:none;padding:0}
+.lg-week td button[aria-pressed="true"]{background:var(--ok);border-color:var(--ok)}
+.qada{display:flex;flex-direction:column}
+.qrow{display:flex;align-items:center;gap:10px;padding:8px 0}
+.qrow+.qrow{border-top:1px solid var(--line)}
+.qrow span{flex:1;font-weight:600}
+.qrow b{min-width:48px;text-align:center;font-size:18px}
+.qrow button{width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:var(--bg);font-size:20px;font-weight:700;line-height:1}
+.qrow.total{font-weight:800}
+.qada-add{display:flex;align-items:flex-end;gap:8px;margin-top:10px}
+.qada-add .field{flex:1}
+
+/* zakat */
+.zk{display:flex;flex-direction:column;gap:10px}
+.zk-h{font-size:14px;color:var(--gold);margin-top:4px}
+.zk .field input{text-align:left;direction:ltr}
+.zk-res{margin-top:12px;border-radius:var(--r);padding:16px;background:var(--accent-soft)}
+.zk-res .line{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:3px 0}
+.zk-res .line span{color:var(--muted)}
+.zk-res .due{margin-top:8px;padding-top:10px;border-top:1px dashed color-mix(in srgb,var(--accent) 40%,transparent);text-align:center}
+.zk-res .due b{display:block;font-size:30px;font-weight:800;color:var(--accent);line-height:1.3}
+.zk-res .due small{color:var(--muted)}
+
 /* tab bar */
 .tabbar{position:fixed;inset:auto 0 0 0;z-index:20;display:flex;justify-content:space-around;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
