@@ -53,6 +53,8 @@
         </div>
       </div>
 
+      <div class="banners" id="hBanners"></div>
+
       <ol class="plist" id="plist"></ol>
 
       <div class="quick">
@@ -64,7 +66,10 @@
         <a class="tcard" href="#tasbih"><span class="qk-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"/><circle cx="17.3" cy="6.7" r="1.6"/><circle cx="19.5" cy="12" r="1.6"/><circle cx="17.3" cy="17.3" r="1.6"/><circle cx="6.7" cy="6.7" r="1.6"/><circle cx="4.5" cy="12" r="1.6"/><circle cx="6.7" cy="17.3" r="1.6"/><path d="M12 19.5v3"/></svg></span><b>تەسبیح</b><small id="tkTasbih"></small></a>
         <a class="tcard" href="#log"><span class="qk-ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4M9 15l2 2 4-4"/></svg></span><b>تۆماری نوێژ</b><small id="tkLog"></small></a>
         <a class="tcard" href="#zakat"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="5.5" ry="2.5"/><path d="M3.5 7v4c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5V7"/><path d="M9.5 16.4c.9 1.2 3.2 2.1 6 2.1 3 0 5.5-1.1 5.5-2.5v-4c0-1.4-2.5-2.5-5.5-2.5"/></svg></span><b>زەکات‌ژمێر</b><small>زەکاتی ساڵانە</small></a>
+        <a class="tcard" href="#fast"><span class="qk-ic gold"><svg viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 1 1 9.5 5a6 6 0 0 0 9.5 9.5Z"/><path d="m17 3 .6 1.4L19 5l-1.4.6L17 7l-.6-1.4L15 5l1.4-.6Z"/></svg></span><b>ڕۆژوو و بۆنەکان</b><small id="tkFast"></small></a>
       </div>
+
+      <div class="panel aotd" id="aotd" hidden></div>
 
       <details class="month" id="monthBox">
         <summary>خشتەی کاتەکانی ٣٠ ڕۆژی داهاتوو</summary>
@@ -81,8 +86,9 @@
       <div class="seg" role="group" aria-label="پێڕست">
         <button data-qtab="surah" aria-pressed="true">سورەتەکان</button>
         <button data-qtab="juz" aria-pressed="false">جوزئەکان</button>
+        <button data-qtab="marks" aria-pressed="false">نیشانەکان</button>
       </div>
-      <div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="qSearch" type="search" placeholder="ناوی سورەت، ژمارە، یان لاپەڕە…" aria-label="گەڕان لە قورئان"></div>
+      <div class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="qSearch" type="search" placeholder="ناوی سورەت، لاپەڕە، یان وشەیەک لە قورئان…" aria-label="گەڕان لە قورئان"></div>
       <div class="slist" id="slist"><div class="empty">قورئان ئامادە دەکرێت…</div></div>
     </section>
 
@@ -184,6 +190,26 @@
       </div>
     </section>
 
+    <!-- FASTING + OCCASIONS -->
+    <section class="view" id="v-fast" data-view="fast" hidden>
+      <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>ڕۆژوو و بۆنەکان</h1><span class="sub" id="fsHijri"></span></div>
+      <div class="panel" id="fsRamadan"></div>
+      <div class="panel">
+        <b>ڕۆژووی قەزا</b>
+        <p class="fine">ژمارەی ئەو ڕۆژووانەی کە قەزات لەسەرە.</p>
+        <div class="qrow"><span>ڕۆژی قەزا</span><button data-fq="-1" aria-label="کەمکردنەوە">−</button><b class="num" id="fsQada">٠</b><button data-fq="1" aria-label="زیادکردن">+</button></div>
+      </div>
+      <div class="panel">
+        <b>ڕۆژووی سوننەت لە دوو هەفتەی داهاتوودا</b>
+        <div class="olist" id="fsSunnah"></div>
+      </div>
+      <div class="panel">
+        <b>بۆنە ئیسلامییەکان</b>
+        <div class="olist" id="fsOcc"></div>
+      </div>
+      <p class="fine">بەروارە کۆچییەکان بە پێی ساڵنامەی ئوم ئەلقوڕا حیساب دەکرێن. بە پێی بینینی مانگ لەوانەیە یەک ڕۆژ جیاوازی هەبێت. بەڕێوەبەر دەتوانێت لە ڕێکخستنەکاندا ڕاستی بکاتەوە.</p>
+    </section>
+
     <!-- ZAKAT -->
     <section class="view" id="v-zakat" data-view="zakat" hidden>
       <div class="vh"><h1><a class="back" href="#home" aria-label="گەڕانەوە"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></a>زەکات‌ژمێر</h1><span class="sub">٢٫٥٪ی ماڵی گەیشتوو بە نیساب</span></div>
@@ -245,6 +271,15 @@
   </div>
   <div class="r-stage" id="rStage">
     <article class="page" id="rPage"></article>
+  </div>
+  <div class="vbar" id="vbar" hidden>
+    <b id="vbTitle"></b>
+    <div class="vb-acts">
+      <button data-va="mark"><svg viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4-6 4Z"/></svg><span id="vbMark">نیشانکردن</span></button>
+      <button data-va="img"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg><span>وەک وێنە</span></button>
+      <button data-va="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></svg><span>کۆپی</span></button>
+      <button data-va="close" aria-label="داخستن"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
   </div>
   <div class="r-bot">
     <button class="icon-btn" id="rPrev" aria-label="لاپەڕەی پێشوو"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
